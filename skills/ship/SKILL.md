@@ -120,6 +120,21 @@ self-evident changes.
 Stage each group explicitly by path — `git add <paths>`, never `git add -A` —
 so the grouping is what actually lands.
 
+**Then verify what actually landed.** `git commit` commits the whole index, not
+only the paths just staged, so anything already sitting there — staged by an
+earlier step, by an editor, by an IDE's "add to VCS" — rides along silently
+under your commit message.
+
+```bash
+git show --stat --oneline HEAD
+```
+
+Every file listed must belong to the scope just committed, and the count must
+match what was staged. `git log --oneline` and `git status -sb` will **not** show
+this — the first prints only subjects, the second is clean either way once the
+commit exists. If a stray file landed, stop and report it before committing
+anything else: it is far cheaper to fix before the next commit builds on top.
+
 ### 5. Merge to main
 
 ```bash
@@ -159,8 +174,9 @@ push that happened.
 
 ### 8. Report
 
-State what was committed (each scope and its subject line), whether the branch
-was merged and removed, and the pushed range. If anything was skipped or left
+State what was committed — each scope, its subject line, and the file count from
+the `--stat` check — plus whether the branch was merged and removed, and the
+pushed range as confirmed from the push output. If anything was skipped or left
 behind — untracked files not staged, a version bump that should happen, an
 unmapped path — say so explicitly.
 
