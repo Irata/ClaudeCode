@@ -1228,12 +1228,15 @@ Reference: `skills/joomla/version-bump/SKILL.md` (conversion), `agents/joomla/jo
 - **Install script drifted from the update chain** (🚨 CRITICAL): A fresh install pins `#__schemas` straight to the newest update filename, so **update files never run on a fresh install**. `sql/install.*.sql` must therefore be the complete *current* schema, not the original one. Flag any column, index, engine, or collation introduced by an update file that is absent from the install script.
   - **Detection**: Build the effective schema by replaying the update files in `version_compare` order over the install script's `CREATE TABLE`, then diff. Check column order against each `AFTER` clause, plus index names, `ENGINE`, and `COLLATE`.
   - **Impact**: fresh and upgraded installs diverge silently. The bug surfaces only on a customer's new site, which is why it survives testing.
+- **Primary key declared as a column attribute** (⚠️ IMPORTANT): The convention is a trailing `PRIMARY KEY (...)` table constraint grouped with the other keys — flag an inline `PRIMARY KEY` on a column definition in any `CREATE TABLE`.
+  - Raise to 🚨 **CRITICAL** where a single statement carries **both** forms. That is not redundancy, it is fatal: MySQL rejects it with `ERROR 1068, Multiple primary key defined`, so the table is never created and installation fails outright.
+  - **Why it survives testing**: `CREATE TABLE IF NOT EXISTS` succeeds silently wherever the table already exists, so the statement only ever executes on a genuinely fresh install — a customer's new site, typically long after the change shipped. Grep the install SQL rather than relying on a successful local install to prove it.
 - **Install or uninstall SQL that destroys data** (🚨 CRITICAL): Data tables are removed manually by the administrator, never automatically.
   - Flag `DROP TABLE` on a data table at the top of `sql/install.*.sql` — reinstalling wipes live data, and it silently defeats any policy of leaving the table in place on uninstall. `CREATE TABLE IF NOT EXISTS` alone is sufficient.
   - Flag an `<uninstall>` block wired to SQL that drops a data table.
   - Flag `sql/uninstall.*.sql` referencing tables belonging to a **different** extension — a common copy-paste leftover. Inert while unreferenced, destructive the moment someone wires it up.
 
-Reference: `includes/joomla-coding-preferences.md` → "SQL Update File Management" (manifest wiring, `/** CAN FAIL **/`, install completeness, data preservation), `skills/joomla/version-bump/SKILL.md` (step 6 replay check).
+Reference: `includes/joomla-coding-preferences.md` → "Primary Keys — Declare as a Table Constraint, Never a Column Attribute", "SQL Update File Management" (manifest wiring, `/** CAN FAIL **/`, install completeness, data preservation), `skills/joomla/version-bump/SKILL.md` (step 6 replay check).
 
 ### File Upload Patterns
 - **Extension-only validation**: File uploads must validate both file extension AND MIME type (via `finfo`). Extension alone is trivially spoofable.

@@ -713,6 +713,33 @@ trait LocalTraits
 - Use `DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci` for all tables
 - Use `ENGINE=InnoDB` for all tables
 
+#### Primary Keys — Declare as a Table Constraint, Never a Column Attribute
+
+Declare the primary key as a `PRIMARY KEY (...)` clause at the foot of the column list, grouped with the other keys. Never use the inline `PRIMARY KEY` column attribute.
+
+```sql
+-- WRONG — inline attribute on the column definition
+CREATE TABLE IF NOT EXISTS `#__example` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `title` VARCHAR(255) NOT NULL DEFAULT ''
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- CORRECT — table-level constraint, grouped with the other keys
+CREATE TABLE IF NOT EXISTS `#__example` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `title` VARCHAR(255) NOT NULL DEFAULT '',
+    PRIMARY KEY (`id`),
+    KEY `idx_title` (`title`(191))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+Why:
+- Every key declaration sits in one place at the foot of the definition, so the full index picture is readable without scanning the column list.
+- It is the only form that extends to composite keys — ``PRIMARY KEY (`item_id`, `tag_id`)`` — so a link table and a single-column table read identically.
+- It matches the form Joomla core uses throughout its own install SQL.
+
+**The failure it prevents.** Writing both forms — an inline `PRIMARY KEY` *and* a trailing `PRIMARY KEY (...)` — is not redundant, it is fatal: MySQL rejects the statement with `ERROR 1068, Multiple primary key defined`, so the table is never created. This is easy to introduce when adding a keys block to an older table definition, and easy to miss, because `CREATE TABLE IF NOT EXISTS` succeeds silently on any system where the table already exists. It fails only on a genuinely fresh install — typically a customer's new site, long after the change shipped.
+
 #### SQL Update Files — One Operation Per ALTER TABLE
 
 Joomla's Database Checker (`MysqlChangeItem::buildCheckQuery()`) parses each SQL statement in update files and generates a verification query to confirm the change was applied. **It only handles the first operation in each `ALTER TABLE` statement.** Multi-operation statements cause two problems:
