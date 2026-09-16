@@ -225,6 +225,16 @@ These are exceptions, not a general license — ordinary per-record writes still
 - See `includes/joomla-devel-environment.md` for the full repository structure reference.
 
 ### Version Synchronisation (V.R.M)
+- **Bump at the start of the change, before any code is written.** Decide the
+  version the change will ship as, set it, then develop against it. The whole
+  chain — `@since` tags, the SQL update filename, the `[V.R.M]` commit suffix —
+  depends on that version already existing, so bumping last means writing every
+  one of them twice.
+  1. `/version-bump <level>` — sets `<version>` and `<creationDate>`, creates the
+     SQL update file under its final name
+  2. Write the code, tagging new or changed symbols `@since <that version>`
+  3. Append schema changes to the SQL file already named for this version
+  4. Commit, carrying `[V.R.M]` because the manifest changed
 - The extension version follows **V.R.M** (Version.Release.Modification) format (e.g. `0.0.5`)
 - **Reset rules when incrementing**:
   - Incrementing **V** (version) resets both **R** and **M** to `0` (e.g. `1.2.3` → `2.0.0`)
@@ -233,6 +243,11 @@ These are exceptions, not a general license — ordinary per-record writes still
 - **Two files MUST stay in sync**:
   1. **SQL update file**: `sql/updates/mysql/{V.R.M}.sql`
   2. **Manifest XML**: `<version>` element in `admin/com_{name}/{name}.xml`
+- **`<creationDate>` is `YYYY-MM-DD`, and changes with the version.** It is the
+  release date of the version beside it, so a bump that leaves it untouched dates
+  the release to whenever the previous one shipped. Formats such as `April 2025`
+  are wrong even when the month is right — they sort incorrectly and cannot be
+  compared with a date from another manifest.
 - **The manifest is the single source of truth for the version.** The Phing build file MUST read it at build time rather than carrying a hardcoded literal:
   ```xml
   <xmlproperty file="${sourcedir}/admin/${ext_prefix}${ext_name}/${ext_name}.xml" prefix="mf" keepRoot="true" />
@@ -250,6 +265,11 @@ These are exceptions, not a general license — ordinary per-record writes still
 - **When bumping the version**, also review the `<creationDate>` element in the manifest XML and update it to the current date (e.g. `<creationDate>yyyy-mm-dd</creationDate>`) if it does not reflect the current date
 
 ### PHPDoc `@since` Tags — Track the Manifest Version
+- **Bump the version before writing the code, not after.** The tag must equal the
+  version the change will ship as, so that version has to exist in the manifest
+  before the first symbol is written. Bumping at the end invalidates every tag
+  written during development and forces a second pass over the same files — see
+  *Version Synchronisation (V.R.M)* for the ordering.
 - **New or changed code MUST be tagged with the owning extension's current manifest `<version>`.** Do **not** guess a value or copy the highest `@since` already present in the codebase — existing tags may have drifted out of step with the manifest.
 - **Read the manifest before writing the tag**:
   - Component code → `admin/com_{name}/{name}.xml` `<version>`

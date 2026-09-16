@@ -774,6 +774,45 @@ job, not a review edit.
 Reference: `includes/joomla-coding-preferences.md` → "PHPDoc `@since` Tags —
 Track the Manifest Version", and "Version Synchronisation (V.R.M)".
 
+### Manifest `<creationDate>` Stale or Malformed (⚠️ IMPORTANT / 💡 SUGGESTION)
+
+`<creationDate>` is the release date of the `<version>` beside it. The two move
+together.
+
+**Detection:**
+- `Grep: "<creationDate>"` across every manifest in the change
+- Flag any value not matching `^\d{4}-\d{2}-\d{2}$` — `April 2025` and
+  `September 2026` are wrong even when the month is right: they sort incorrectly
+  and cannot be compared against another manifest
+- ⚠️ **IMPORTANT** where `<version>` changed in this diff and `<creationDate>`
+  did not — the release is dated to whenever the previous one shipped
+- 💡 **SUGGESTION** where the format is wrong but the version did not change
+
+**Why it survives:** nothing validates it. Joomla displays whatever string is
+there, so a wrong date is only ever noticed by a person reading the extension
+manager months later.
+
+**Fix:** set it to the bump date in `YYYY-MM-DD`. If a whole repository has
+drifted, report it rather than correcting every manifest inline.
+
+### Version Bumped After the Work, Not Before (⚠️ IMPORTANT)
+
+The convention is to bump at the **start** of a change, so `@since` tags, the SQL
+update filename and the `[V.R.M]` commit suffix are all written against a version
+that already exists. A bump applied afterwards leaves those written against the
+old one.
+
+**Detection** — on a change that includes a version bump:
+- `@since` tags on symbols the change adds that carry the **previous** version
+- A `sql/updates/mysql/*.sql` file whose name does not match the new `<version>`
+- `<creationDate>` unchanged while `<version>` moved
+
+Any of those together with a bump in the same change is the signature of
+bump-last, and means the tags need a second pass.
+
+**Fix:** correct the tags and the SQL filename to the shipped version. Reference:
+`includes/joomla-coding-preferences.md` → "Version Synchronisation (V.R.M)".
+
 ### Deprecated Functions
 - **`jexit()`**: Deprecated since 4.0, removed in 6.0. Flag any usage. Use `$this->checkToken()` in controllers or throw an exception.
 - **`Session::checkToken() || jexit()`**: The entire pattern is deprecated. Replace with `$this->checkToken()`.

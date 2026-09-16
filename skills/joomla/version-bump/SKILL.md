@@ -19,11 +19,35 @@ Bump the project version following the **V.R.M** (Version.Release.Modification) 
 
 If no argument is provided, ask the user which level to bump.
 
+## When to Run This
+
+**At the start of the change, before any code is written.** Decide the version the
+change will ship as, bump it, then develop against it.
+
+Running it at the end is what produces rework. Code gets written, `@since` tags
+are guessed or copied from neighbouring symbols, the manifest is bumped last, and
+every tag written during development is now wrong — along with the manifest date,
+the SQL update filename, and anything already committed.
+
+The order that avoids all of it:
+
+1. `/version-bump <level>` — manifest `<version>` and `<creationDate>` set, SQL
+   update file created under its final name
+2. Write the code, tagging every new or changed symbol `@since <that version>`
+3. Append schema changes to the SQL update file already named for this version
+4. `/ship` — commit, carrying `[V.R.M]` on the subject because the manifest changed
+
+A bump discovered mid-change is the exception, not the pattern. When it happens,
+run the skill and then **re-check every `@since` already written in this change** —
+they were written against the old version and are now wrong.
+
 ## Context: SQL Update File Management
 
-This skill works in tandem with the **SQL Update File Management** convention documented in `joomla-coding-preferences.md`. During development, agents create and append to an unstaged SQL update file whenever schema changes are needed. By the time this skill runs, one of two situations exists:
+This skill works in tandem with the **SQL Update File Management** convention documented in `joomla-coding-preferences.md`. Run at the start of a change, this skill creates the SQL update file under its
+final name, and schema changes are appended to it as development proceeds — no
+rename, no reconciliation. Two situations therefore arise:
 
-1. **An unstaged SQL file already exists** in `sql/updates/mysql/` — created during development when schema changes were written. This file needs to be reconciled with the final version number.
+1. **An unstaged SQL file already exists** in `sql/updates/mysql/` — the bump is happening mid-change, after schema work was already written against the old version. Reconcile it with the new version number, and re-check the `@since` tags written so far.
 2. **No unstaged SQL file exists** — no schema changes were made during this development cycle. A new SQL file is created as a version marker, containing basic placeholder comment content (never left truly empty — a zero-byte SQL file can cause problems for tooling and is ambiguous in review).
 
 ## Steps
