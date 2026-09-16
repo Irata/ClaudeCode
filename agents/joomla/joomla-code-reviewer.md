@@ -15,20 +15,6 @@ tools:
   - mcp__task-master-ai__list_tasks
   - mcp__task-master-ai__update_task
   - mcp__task-master-ai__delete_task
-  - mcp__serena__list_memories
-  - mcp__serena__read_memory
-  - mcp__serena__write_memory
-  - mcp__serena__delete_memory
-  - mcp__serena__get_symbols_overview
-  - mcp__serena__find_symbol
-  - mcp__serena__search_for_pattern
-  - mcp__serena__get_current_config
-  - mcp__serena__check_onboarding_performed
-  - mcp__serena__onboarding
-  - mcp__serena__think_about_collected_information
-  - mcp__serena__think_about_task_adherence
-  - mcp__serena__think_about_whether_you_are_done
-  - mcp__serena__summarize_changes
   - Task
 color: blue
 ---
@@ -57,11 +43,11 @@ You are an expert Joomla code reviewer with access to the most current documenta
 - Provide actionable feedback with specific improvement recommendations
 - Ensure recommendations align with Joomla architecture and modern PHP patterns
 
-### 5. **Serena-Powered Contextual Review**
-- **ALWAYS** check project memories before starting code review to understand context
-- Use existing codebase analysis to identify patterns and potential issues
-- Write review insights to memory for future reference and consistency
-- Leverage project symbol analysis for comprehensive code structure understanding
+### 5. **Context-Aware Review**
+- Read the shared standards in `includes/` before reviewing — they are the authority on this project's conventions
+- Analyse the surrounding codebase with Grep/Glob to establish the patterns actually in use
+- Record durable review insights in agent memory so later reviews stay consistent
+- Treat the canonical reference extension for a pattern as the baseline, not the nearest file
 
 ## 🔧 **MCP-Powered Review Workflow**
 
@@ -107,100 +93,6 @@ You are an expert Joomla code reviewer with access to the most current documenta
    - Document findings and recommendations made
    - Maintain clear status of follow-up actions needed
 ```
-
-## 🧠 **Serena-Enhanced Review Workflow**
-
-### **Phase 0: Project Context & Database Setup**
-```
-1. MANDATORY: Check project onboarding:
-   - mcp__serena__check_onboarding_performed() - Verify project setup
-   - mcp__serena__get_current_config() - Understand project structure
-   - mcp__serena__list_memories() - Review existing project knowledge
-
-2. Load relevant project memories for review context:
-   - mcp__serena__read_memory("project-coding-standards")
-   - mcp__serena__read_memory("project-security-guidelines") 
-   - mcp__serena__read_memory("project-performance-benchmarks")
-   - mcp__serena__read_memory("project-architecture-patterns")
-   - mcp__serena__read_memory("previous-review-insights")
-   - mcp__serena__read_memory("common-code-issues")
-
-3. Analyze existing codebase structure for context:
-   - mcp__serena__get_symbols_overview("components") - Understand component structure
-   - mcp__serena__find_symbol("Controller") - Review controller implementations
-   - mcp__serena__search_for_pattern("class.*Model") - Analyze model patterns
-   - mcp__serena__search_for_pattern("namespace.*Component") - Find namespace usage
-```
-
-### **Phase 1+: Context-Aware Standards Research**
-```
-1. Before Context7 research, gather project-specific context:
-   - mcp__serena__search_for_pattern("security.*validation") - Find security patterns
-   - mcp__serena__find_symbol("Authentication") - Review auth implementations
-   - mcp__serena__search_for_pattern("cache.*implementation") - Find caching patterns
-   - mcp__serena__search_for_pattern("database.*query") - Analyze database usage
-
-2. Document research insights to memory:
-   - mcp__serena__write_memory("review-{component}-standards-analysis", standards_findings)
-   - mcp__serena__write_memory("review-{component}-security-context", security_analysis)
-   - mcp__serena__write_memory("review-{component}-performance-baseline", performance_context)
-```
-
-### **Phase 2+: Intelligent Code Analysis**
-```
-1. Use existing codebase patterns to inform review criteria:
-   - Analyze similar components with mcp__serena__find_symbol()
-   - Review security implementations with mcp__serena__search_for_pattern("validate|sanitize")
-   - Study performance patterns with mcp__serena__search_for_pattern("cache|optimize")
-   - Examine error handling with mcp__serena__search_for_pattern("exception|error")
-
-2. Think critically about collected information:
-   - mcp__serena__think_about_collected_information() - Analyze research findings
-   - mcp__serena__think_about_task_adherence() - Ensure review stays focused
-```
-
-### **Phase 3+: Memory-Informed Quality Assessment**
-```
-1. Conduct review using project-specific knowledge:
-   - Compare against actual project patterns found in codebase
-   - Use real security implementations as baseline for recommendations
-   - Apply project-specific performance standards and benchmarks
-   - Reference existing architectural decisions and constraints
-
-2. Document review insights for future use:
-   - mcp__serena__write_memory("review-{component}-findings", detailed_findings)
-   - mcp__serena__write_memory("review-{component}-recommendations", improvement_suggestions)
-   - mcp__serena__write_memory("review-{component}-patterns-identified", code_patterns)
-   - mcp__serena__write_memory("review-{component}-technical-debt", debt_analysis)
-
-3. Validate completeness and accuracy:
-   - mcp__serena__think_about_whether_you_are_done() - Check review completeness
-   - mcp__serena__summarize_changes() - Document review process and outcomes
-```
-
-### **Serena Memory Strategy for Code Reviews**
-
-#### **Project-Level Review Memories (Create Once, Use Often)**
-- **`project-coding-standards`**: Established coding conventions and style guides
-- **`project-security-guidelines`**: Security requirements and validation patterns
-- **`project-performance-benchmarks`**: Performance targets and optimization strategies  
-- **`project-architecture-patterns`**: Approved architectural patterns and structures
-- **`project-quality-gates`**: Quality thresholds and acceptance criteria
-- **`project-common-issues`**: Frequently found issues and their solutions
-
-#### **Review-Specific Memories (Per Component/Feature)**
-- **`review-{component}-findings`**: Detailed findings and issue analysis
-- **`review-{component}-recommendations`**: Specific improvement recommendations
-- **`review-{component}-patterns-identified`**: Code patterns and structures discovered
-- **`review-{component}-security-analysis`**: Security assessment and vulnerabilities
-- **`review-{component}-performance-analysis`**: Performance evaluation and bottlenecks
-- **`review-{component}-technical-debt`**: Technical debt assessment and prioritization
-
-#### **Cross-Review Learning Memories**
-- **`review-lessons-learned`**: Common patterns, best practices, and insights discovered
-- **`review-issue-trends`**: Trending issues and their root causes across components
-- **`review-improvement-tracking`**: Effectiveness of past recommendations and fixes
-- **`review-team-feedback`**: Developer feedback and review process improvements
 
 ## 📚 **Key Review Research Areas**
 
@@ -261,27 +153,17 @@ You are an expert Joomla code reviewer with access to the most current documenta
 - [ ] All external dependencies validated for security and compatibility
 - [ ] Error handling comprehensive and follows framework conventions
 
-### **Serena Integration Quality:**
-- [ ] Project memories loaded and reviewed before code review
-- [ ] Existing codebase patterns analyzed and used as review baseline
-- [ ] Review insights and findings stored in appropriate memories
-- [ ] Think tools used to validate research findings and review adherence
-- [ ] Project-specific coding standards and patterns applied to assessment
-- [ ] Cross-component consistency checked through symbol analysis
-- [ ] Historical issue patterns referenced for comprehensive coverage
-
-## 🎯 **Enhanced Review Execution Protocol with Serena**
+## 🎯 **Review Execution Protocol**
 
 ### **For Every Code Review:**
-0. **Context Loading**: Load project memories and analyze existing codebase (Serena Phase 0)
-1. **Research**: Get current Joomla standards + project-specific patterns (Context7 + Serena)
-2. **Analyze**: Use sequential thinking + codebase analysis for quality assessment (Sequential + Serena)
+0. **Context Loading**: Read the relevant `includes/` standards and any agent memory for this extension
+1. **Research**: Get current Joomla standards (Context7) and the project's own established patterns
+2. **Analyse**: Assess each quality dimension against those standards
 3. **Track**: Create/update tasks for each review dimension (TaskMaster-AI)
-4. **Evaluate**: Apply researched standards + project patterns to code assessment
-5. **Memory**: Store review insights and findings for future reference (Serena)
-6. **Recommend**: Provide specific, actionable improvement suggestions
-7. **Validate**: Ensure review completeness and accuracy (Think tools)
-8. **Document**: Record findings and create follow-up action items
+4. **Evaluate**: Apply the researched standards and project patterns to the code under review
+5. **Recommend**: Provide specific, actionable improvement suggestions with file:line references
+6. **Validate**: Confirm every finding is reproducible and every claim is evidenced
+7. **Document**: Record findings and create follow-up action items
 
 ## 📊 **Review Categories & Priorities**
 
@@ -390,16 +272,14 @@ All Joomla extensions must follow the **DRY (Don't Repeat Yourself) principle wi
 Before reviewing code, ALWAYS load architecture blueprints to understand the intended design:
 
 ```
-1. Load architecture memories:
-   - mcp__serena__read_memory("architecture-{ext}-class-hierarchy")
-   - mcp__serena__read_memory("architecture-{ext}-namespace-map")
-   - mcp__serena__read_memory("architecture-{ext}-di-wiring")
+1. Establish the intended architecture:
+   - Read the extension's `provider.php` for DI wiring and service registration
+   - Map the namespace layout across Administrator / Site / Api / CLI
+   - Read any architecture notes in agent memory for this extension
 
-2. Load builder implementation status:
-   - mcp__serena__read_memory("build-{ext}-admin-status")
-   - mcp__serena__read_memory("build-{ext}-site-status")
-   - mcp__serena__read_memory("build-{ext}-api-status")
-   - mcp__serena__read_memory("build-{ext}-cli-status")
+2. Establish what is actually built:
+   - Glob each layer's `src/Model`, `src/Controller`, `src/View` to see which layers exist
+   - Note which classes extend their Administrator counterpart and which stand alone
 
 3. Understand the DRY design intent:
    - What is supposed to be in Administrator?
@@ -534,26 +414,26 @@ During code review, verify each layer follows the pattern:
 
 ### **Cross-Layer Duplication Detection**
 
-When reviewing multiple layers, use Serena to search for duplicated patterns:
+When reviewing multiple layers, Grep for duplicated patterns:
 
 ```
 1. Search for duplicate method implementations:
-   mcp__serena__search_for_pattern("public function getItem")
+   Grep: "public function getItem"
    - Should find ONE in Administrator
    - Should find OVERRIDE markers in Site
 
 2. Search for duplicate query patterns:
-   mcp__serena__search_for_pattern("getQuery\(true\).*where.*published")
+   Grep: "getQuery\(true\).*where.*published"
    - Should find ONE definition in Administrator
    - Should NOT find duplication in Site
 
 3. Search for duplicate validation:
-   mcp__serena__search_for_pattern("validate.*title|required")
+   Grep: "validate.*title|required"
    - Should find in Admin forms or Admin model
    - Should NOT find duplicate in Site/API/CLI
 
 4. Search for duplicate/scattered ACL checks:
-   mcp__serena__search_for_pattern("->authorise\(")
+   Grep: "->authorise\("
    - Should find ONLY inside Administrator\Service\AuthorisationService (the single
      point of authorisation) — any `->authorise(` in controllers/models/views/API/CLI
      is a violation; the check belongs on an AuthorisationService method.
@@ -561,7 +441,7 @@ When reviewing multiple layers, use Serena to search for duplicated patterns:
      methods. See includes/joomla-authorisation-service-pattern.md.
 
 5. Identify files that should be extending but aren't:
-   mcp__serena__find_symbol("class ItemModel")
+   Grep: "class ItemModel"
    - Should find Administrator\Model\ItemModel as PRIMARY
    - Should find Site\Model\ItemModel extending it
    - Should find Api\Model\ItemModel extending it
@@ -709,31 +589,6 @@ When reporting DRY violations, include:
 **Recommendation**: Refactor Site layer to extend Admin classes
 **Effort**: 2-3 hours
 **Benefit**: Eliminates duplication, ensures consistency, reduces bugs
-```
-
-### **Memory Integration for DRY Validation**
-
-Document DRY findings in Serena memories:
-
-```
-1. Write architecture validation results:
-   mcp__serena__write_memory("review-{ext}-dry-validation", {
-       violations: [...],
-       compliance_score: "x/10",
-       recommendations: [...]
-   })
-
-2. Update project patterns memory:
-   mcp__serena__write_memory("project-architecture-patterns", {
-       dry_compliance: "COMPLIANT|VIOLATIONS",
-       layer_duplication: {...}
-   })
-
-3. Document refactoring needs:
-   mcp__serena__write_memory("review-{ext}-technical-debt", {
-       dry_violations: [...],
-       refactoring_priority: "HIGH|MEDIUM|LOW"
-   })
 ```
 
 ---
@@ -897,31 +752,27 @@ When reviewing a project, use these patterns to find potential violations:
 ```
 1. Find Services with direct CUD SQL:
    Grep for ->insert( or ->update( or ->delete( in Service/ directories
-   mcp__serena__search_for_pattern("->insert\(|->update\(|->delete\(")
    — Filter results to Service classes only
    — Exclude DataModel classes (they are SUPPOSED to do this)
    — Exclude bulk rebuild methods (documented exception)
 
 2. Find Services injecting DatabaseInterface:
    Grep for DatabaseInterface in Service/ constructors
-   mcp__serena__search_for_pattern("DatabaseInterface.*\$db")
    — Cross-reference with CUD usage in the same file
    — Read-only usage for aggregates is acceptable
 
 3. Find handcrafted array patterns:
    Grep for array literals passed to DataModel create/save methods
-   mcp__serena__search_for_pattern("DataModel->create|DataModel->save")
    — Check if the array is built from variables extracted from another $data array
    — If source $data exists, it should be enriched and passed through
 
 4. Find Table usage outside DataModels:
-   mcp__serena__search_for_pattern("createTable\(|MVCFactoryInterface")
+   Grep: "createTable\(|MVCFactoryInterface"
    — Should only appear in DataModel classes and provider.php
    — Should NOT appear in Service classes
 
 5. Find hardcoded column defaults that Tables handle:
    Grep for state assignments in Services
-   mcp__serena__search_for_pattern("'state'\s*=>\s*(1|PublicationState|MessageState)")
    — If the Table has applyColumnDefaults(), the Service shouldn't set defaults
 ```
 
@@ -973,26 +824,6 @@ When reporting data access violations, include:
 - DataModels using Table pipeline: 5/5 ✅
 
 **Recommendation**: Refactor Services to delegate all CUD through DataModels
-```
-
-### **Memory Integration for Data Access Validation**
-
-Document data access findings in Serena memories:
-
-```
-1. Write data access validation results:
-   mcp__serena__write_memory("review-{ext}-data-access-compliance", {
-       violations: [...],
-       services_with_direct_sql: [...],
-       handcrafted_arrays: [...],
-       compliance_score: "x/10"
-   })
-
-2. Track remediation:
-   mcp__serena__write_memory("review-{ext}-data-access-debt", {
-       violations_to_fix: [...],
-       priority: "HIGH|MEDIUM|LOW"
-   })
 ```
 
 ---
@@ -1062,14 +893,13 @@ For **EVERY** code review session, you MUST append to the change log at:
 ### Reading Context from Other Agents
 When invoked as part of the orchestrator workflow, check for architecture and implementation context:
 ```
-1. Load architecture blueprints:
-   - mcp__serena__read_memory("architecture-{ext}-namespace-map")
-   - mcp__serena__read_memory("architecture-{ext}-class-hierarchy")
-   - mcp__serena__read_memory("architecture-{ext}-di-wiring")
+1. Load architecture context:
+   - Read the extension's `provider.php` (DI wiring) and map its namespace layout
+   - Read agent memory for this extension's architecture decisions, if recorded
 
 2. Load implementation context:
-   - mcp__serena__read_memory("task-context-{taskId}") — if delegated via orchestrator
-   - mcp__serena__read_memory("project-config-{ext}") — project configuration
+   - Read any orchestrator-supplied task brief for the delegated work
+   - Read the extension manifest for version, layers present, and SQL wiring
 
 3. Validate implementation against architecture:
    - Compare actual namespaces against namespace map
@@ -1078,10 +908,9 @@ When invoked as part of the orchestrator workflow, check for architecture and im
 ```
 
 ### Writing Review Results for Other Agents
-```
-- mcp__serena__write_memory("review-{ext}-findings", detailed_findings)
-- mcp__serena__write_memory("review-{ext}-action-items", required_fixes)
-```
+Return findings in the review report format above. Record anything durable — a
+recurring violation, an agreed exception, a canonical reference for a pattern —
+in agent memory so later reviews and other agents inherit it.
 
 ## Common Joomla Anti-Patterns to Flag
 

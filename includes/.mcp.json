@@ -12,7 +12,9 @@
     },
     "database-connections": {
       "command": "node",
-      "args": ["E:\\MCP_Servers\\database-connection-mcp\\index.js"],
+      "args": [
+        "E:\\MCP_Servers\\database-connection-mcp\\index.js"
+      ],
       "env": {
         "DB_ENCRYPTION_KEY": "XXXXXX"
       }
@@ -26,15 +28,12 @@
         "@upstash/context7-mcp"
       ]
     },
-    "serena": {
-      "command": "P:/python/astral/bin/uv.exe",
-      "args": ["run", "--directory", "E:/MCP_Servers/serena", "serena-mcp-server", "E:/MCP_Servers/serena/.serena/project.yml"],
-      "cwd": "E:/MCP_Servers/serena"
-    },
     "sequential-thinking": {
       "command": "cmd",
       "args": [
-        "/c", "npx", "-y",
+        "/c",
+        "npx",
+        "-y",
         "@modelcontextprotocol/server-sequential-thinking"
       ]
     }
