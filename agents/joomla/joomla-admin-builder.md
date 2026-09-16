@@ -18,20 +18,6 @@ tools:
   - mcp__task-master-ai__list_tasks
   - mcp__task-master-ai__update_task
   - mcp__task-master-ai__delete_task
-  - mcp__serena__list_memories
-  - mcp__serena__read_memory
-  - mcp__serena__write_memory
-  - mcp__serena__delete_memory
-  - mcp__serena__get_symbols_overview
-  - mcp__serena__find_symbol
-  - mcp__serena__search_for_pattern
-  - mcp__serena__get_current_config
-  - mcp__serena__check_onboarding_performed
-  - mcp__serena__onboarding
-  - mcp__serena__think_about_collected_information
-  - mcp__serena__think_about_task_adherence
-  - mcp__serena__think_about_whether_you_are_done
-  - mcp__serena__summarize_changes
 color: blue
 ---
 
@@ -45,12 +31,12 @@ All classes under: `{Vendor}\Component\{Name}\Administrator\`
 
 **ALWAYS** before writing code:
 ```
-1. Load architecture blueprints from Serena:
-   - mcp__serena__read_memory("architecture-{ext}-namespace-map")
-   - mcp__serena__read_memory("architecture-{ext}-class-hierarchy")
-   - mcp__serena__read_memory("architecture-{ext}-di-wiring")
-   - mcp__serena__read_memory("architecture-{ext}-db-schema")
-   - mcp__serena__read_memory("architecture-{ext}-acl-matrix")
+1. Establish the current structure from source:
+   - Glob `src/` across Administrator / Site / Api / CLI for the namespace layout
+   - Read the Administrator classes and note which Site/Api/CLI classes extend them
+   - Read `provider.php` for DI wiring and the services actually registered
+   - Read `sql/install.*.sql` and the `Table` classes for the schema
+   - Read `access.xml` and the `AdministratorServiceAuthorisationService`
 
 2. Review reference includes:
    - includes/joomla-structure-component.md
@@ -1094,7 +1080,5 @@ For **EVERY** build session, append to the change log at:
 
 After completing implementation:
 ```
-1. mcp__serena__write_memory("build-{ext}-admin-status", completion_summary)
-2. mcp__serena__think_about_whether_you_are_done()
-3. mcp__serena__summarize_changes()
+1. Report the summary above to the caller, stating which items are COMPLETE and which are PARTIAL
 ```

@@ -18,20 +18,6 @@ tools:
   - mcp__task-master-ai__list_tasks
   - mcp__task-master-ai__update_task
   - mcp__task-master-ai__delete_task
-  - mcp__serena__list_memories
-  - mcp__serena__read_memory
-  - mcp__serena__write_memory
-  - mcp__serena__delete_memory
-  - mcp__serena__get_symbols_overview
-  - mcp__serena__find_symbol
-  - mcp__serena__search_for_pattern
-  - mcp__serena__get_current_config
-  - mcp__serena__check_onboarding_performed
-  - mcp__serena__onboarding
-  - mcp__serena__think_about_collected_information
-  - mcp__serena__think_about_task_adherence
-  - mcp__serena__think_about_whether_you_are_done
-  - mcp__serena__summarize_changes
 color: magenta
 ---
 
@@ -40,10 +26,10 @@ You are a **Joomla Test Engineer**. You create PHPUnit 10+ tests and document ma
 ## Pre-Implementation Protocol
 
 ```
-1. Load context:
-   - mcp__serena__read_memory("architecture-{ext}-class-hierarchy")
-   - mcp__serena__read_memory("architecture-{ext}-db-schema")
-   - mcp__serena__read_memory("build-{ext}-admin-status") — understand what was built
+1. Establish the current structure from source:
+   - Read the Administrator classes and note which Site/Api/CLI classes extend them
+   - Read `sql/install.*.sql` and the `Table` classes for the schema
+   - Inspect the Administrator layer for what is actually built
 
 2. Research testing patterns:
    - mcp__Context7__resolve-library-id("sebastianbergmann/phpunit")
@@ -349,7 +335,5 @@ Append to: `E:\PROJECTS\LOGS\joomla-test-engineer.md`
 ## Post-Implementation
 
 ```
-1. mcp__serena__write_memory("test-{ext}-status", test_summary)
-2. mcp__serena__think_about_whether_you_are_done()
-3. mcp__serena__summarize_changes()
+1. Report the summary above to the caller, stating which items are COMPLETE and which are PARTIAL
 ```

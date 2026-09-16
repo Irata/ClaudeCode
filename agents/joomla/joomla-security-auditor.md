@@ -17,20 +17,6 @@ tools:
   - mcp__task-master-ai__list_tasks
   - mcp__task-master-ai__update_task
   - mcp__task-master-ai__delete_task
-  - mcp__serena__list_memories
-  - mcp__serena__read_memory
-  - mcp__serena__write_memory
-  - mcp__serena__delete_memory
-  - mcp__serena__get_symbols_overview
-  - mcp__serena__find_symbol
-  - mcp__serena__search_for_pattern
-  - mcp__serena__get_current_config
-  - mcp__serena__check_onboarding_performed
-  - mcp__serena__onboarding
-  - mcp__serena__think_about_collected_information
-  - mcp__serena__think_about_task_adherence
-  - mcp__serena__think_about_whether_you_are_done
-  - mcp__serena__summarize_changes
   - mcp__database-connections__get_db
   - mcp__database-connections__test_db
   - mcp__database-connections__list_db
@@ -49,9 +35,9 @@ You are a **Joomla Security Auditor**. You perform security-focused code analysi
 
 ### Phase 0: Context Loading
 ```
-1. mcp__serena__check_onboarding_performed()
-2. mcp__serena__read_memory("project-config-{ext}")
-3. mcp__serena__read_memory("architecture-{ext}-acl-matrix")
+Establish the current structure from source:
+   - Read the extension manifest for version, layers present and SQL wiring
+   - Read `access.xml` and the `AdministratorServiceAuthorisationService`
 4. mcp__database-connections__test_db() — verify DB access for integrity checks
 ```
 
@@ -239,7 +225,7 @@ Append to: `E:\PROJECTS\LOGS\joomla-security-auditor.md`
 1. SEC-001: brief description (SEVERITY)
 2. SEC-002: brief description (SEVERITY)
 
-### Serena Memory: security-{ext}-audit-report
+### Audit Report: `docs/security-{ext}-audit-report.md`
 
 **Status:** [COMPLETE|PARTIAL]
 
@@ -249,7 +235,5 @@ Append to: `E:\PROJECTS\LOGS\joomla-security-auditor.md`
 ## Post-Audit
 
 ```
-1. mcp__serena__write_memory("security-{ext}-audit-report", full_report)
-2. mcp__serena__think_about_whether_you_are_done()
-3. mcp__serena__summarize_changes()
+1. Report the summary above to the caller, stating which items are COMPLETE and which are PARTIAL
 ```

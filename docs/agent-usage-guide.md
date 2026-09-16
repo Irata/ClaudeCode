@@ -8,7 +8,6 @@
    - Context7 — Joomla documentation access
    - Sequential Thinking — structured analysis
    - TaskMaster-AI — task planning and tracking
-   - Serena — project memory and code analysis
    - Database Connections — database access
 
 2. **Claude Code** installed with agent support
@@ -232,8 +231,8 @@ The PRD writer will produce a structured document with numbered requirements
 - **Acceptance Criteria** — testable pass/fail checklist
 - **Extension Dependencies** — links to data layer extensions
 
-The PRD is stored in Serena memory as `prd-emporium-requirements` so the
-`joomla-architect` agent reads it automatically when designing the implementation.
+The PRD is written to `docs/PRD-emporium.md` so the `joomla-architect` agent can
+read it when designing the implementation.
 
 #### Write a PRD for a Cross-Extension Feature
 
@@ -303,32 +302,37 @@ across contexts.
 
 ```
 Phase 1: Requirements (joomla-prd-writer)
-    ↓ PRD stored in Serena memory
+    ↓ PRD written to docs/PRD-{ext}.md
 Phase 2: Architecture (joomla-architect + data-model-architect)
-    ↓ Blueprints stored in Serena memory
+    ↓ Blueprints written to docs/architecture/
 Phase 3: Implementation (builder agents — parallel)
-    ↓ Code written, status stored in Serena
+    ↓ Code written, status reported to the orchestrator
 Phase 4: Language (joomla-language-manager)
     ↓ Language files audited and updated
 Phase 5: Quality (reviewer + tester + security + performance — parallel)
-    ↓ Reports stored in Serena
+    ↓ Reports written to docs/
 Phase 6: Build (joomla-build-agent)
     ↓ Packages created
 ```
 
-### Context Flow via Serena Memories
+### Context Flow
 
-Agents share context through Serena memories with consistent naming:
+Per-task context travels in the Task prompt the orchestrator writes when it
+delegates — a sub-agent sees only that prompt, never the parent conversation.
+Anything that must outlive the task is a document in the repository:
 
 ```
-Orchestrator writes → project-config-{ext}
-PRD Writer writes   → prd-{ext}-requirements
-Architect writes    → architecture-{ext}-{topic}
-Builders write      → build-{ext}-{area}-status
-Reviewers write     → review-{ext}-findings
-Security writes     → security-{ext}-audit-report
-Performance writes  → performance-{ext}-report
+PRD Writer writes   → docs/PRD-{ext}.md
+Architect writes    → docs/architecture/{ext}-{topic}.md
+Builders report     → completion summary to the orchestrator
+Reviewers report    → findings to the orchestrator
+Security writes     → docs/security-{ext}-audit-report.md
+Performance writes  → docs/performance-{ext}-report.md
 ```
+
+The advisory agents — architect, code reviewer, security auditor, debugger and
+less builder — additionally keep durable craft knowledge in native agent memory
+under `~/.claude/agent-memory/<agent>/`, which is shared across every project.
 
 Each agent reads the memories written by upstream agents before starting work.
 
@@ -572,9 +576,9 @@ class CheckoutController extends FormController {
 6. **Separation of Concerns** — Controllers handle HTTP, Services handle business
 7. **Enforces DRY** — No code duplication across contexts
 
-### Memory Convention for Services
+### Document Convention for Services
 
-When the architect designs services, they document in Serena:
+When the architect designs services, it documents them in `docs/architecture/`:
 
 ```
 architecture-{ext}-service-layer: {
@@ -716,10 +720,10 @@ These documents (`docs/PROJECT-ECOSYSTEM.md` and `docs/INTERPROJECT-REFERENCES.m
 
 ## Troubleshooting
 
-### Agent Can't Find Serena Memories
-- Verify Serena MCP server is running
-- Check that the agent has `mcp__serena__*` tools in its tool list
-- Ensure the memory name matches the convention exactly
+### Agent Can't Find the Architecture Blueprints
+- Confirm the architect ran and wrote files under `docs/architecture/`
+- Check the orchestrator named those paths in the builder's Task prompt
+- Confirm the file name matches the convention exactly
 
 ### Context7 Not Returning Results
 - Verify Context7 MCP server is running
@@ -732,8 +736,8 @@ These documents (`docs/PROJECT-ECOSYSTEM.md` and `docs/INTERPROJECT-REFERENCES.m
 - Use `mcp__database-connections__test_db()` to diagnose
 
 ### Agent Writes Code That Doesn't Follow Blueprints
-- Ensure the architect agent has written memories before builders start
-- Check that builder agents have the correct Serena memory names
+- Ensure the architect has written its blueprints before builders start
+- Check that the builder's Task prompt names the correct blueprint files
 - Re-run the architect to update blueprints if requirements changed
 
 ### Services Not Being Injected Correctly
@@ -770,7 +774,7 @@ All these operations must be callable from:
 Design the services, namespaces, DI wiring, and database schema.
 ```
 
-**Output** (stored in Serena):
+**Output** (written to `docs/architecture/`):
 ```
 architecture-bookstore-service-layer:
   services:

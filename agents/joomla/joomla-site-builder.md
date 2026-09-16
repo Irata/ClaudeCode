@@ -18,20 +18,6 @@ tools:
   - mcp__task-master-ai__list_tasks
   - mcp__task-master-ai__update_task
   - mcp__task-master-ai__delete_task
-  - mcp__serena__list_memories
-  - mcp__serena__read_memory
-  - mcp__serena__write_memory
-  - mcp__serena__delete_memory
-  - mcp__serena__get_symbols_overview
-  - mcp__serena__find_symbol
-  - mcp__serena__search_for_pattern
-  - mcp__serena__get_current_config
-  - mcp__serena__check_onboarding_performed
-  - mcp__serena__onboarding
-  - mcp__serena__think_about_collected_information
-  - mcp__serena__think_about_task_adherence
-  - mcp__serena__think_about_whether_you_are_done
-  - mcp__serena__summarize_changes
 color: cyan
 ---
 
@@ -45,14 +31,15 @@ All classes under: `{Vendor}\Component\{Name}\Site\`
 
 **ALWAYS** before writing code:
 ```
-1. Load architecture blueprints from Serena:
-   - mcp__serena__read_memory("architecture-{ext}-namespace-map")
-   - mcp__serena__read_memory("architecture-{ext}-routing")
-   - mcp__serena__read_memory("architecture-{ext}-class-hierarchy")
-   - mcp__serena__read_memory("architecture-{ext}-db-schema")
+1. Establish the current structure from source:
+   - Glob `src/` across Administrator / Site / Api / CLI for the namespace layout
+   - Read the component `Router` and the menu item XML
+   - Read the Administrator classes and note which Site/Api/CLI classes extend them
+   - Read `sql/install.*.sql` and the `Table` classes for the schema
 
 2. Check what admin-builder has already created:
-   - mcp__serena__read_memory("build-{ext}-admin-status")
+   Establish the current structure from source:
+      - Inspect the Administrator layer for what is actually built
    - Table classes are shared — reuse those from Administrator namespace
 
 3. Review reference includes:
@@ -575,7 +562,5 @@ For **EVERY** build session, append to the change log at:
 ## Post-Implementation
 
 ```
-1. mcp__serena__write_memory("build-{ext}-site-status", completion_summary)
-2. mcp__serena__think_about_whether_you_are_done()
-3. mcp__serena__summarize_changes()
+1. Report the summary above to the caller, stating which items are COMPLETE and which are PARTIAL
 ```

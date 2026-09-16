@@ -16,20 +16,6 @@ tools:
   - mcp__task-master-ai__list_tasks
   - mcp__task-master-ai__update_task
   - mcp__task-master-ai__delete_task
-  - mcp__serena__list_memories
-  - mcp__serena__read_memory
-  - mcp__serena__write_memory
-  - mcp__serena__delete_memory
-  - mcp__serena__get_symbols_overview
-  - mcp__serena__find_symbol
-  - mcp__serena__search_for_pattern
-  - mcp__serena__get_current_config
-  - mcp__serena__check_onboarding_performed
-  - mcp__serena__onboarding
-  - mcp__serena__think_about_collected_information
-  - mcp__serena__think_about_task_adherence
-  - mcp__serena__think_about_whether_you_are_done
-  - mcp__serena__summarize_changes
   - mcp__database-connections__get_db
   - mcp__database-connections__test_db
   - mcp__database-connections__list_db
@@ -48,8 +34,9 @@ You are a **Joomla Performance Analysis Specialist**. You analyze Joomla extensi
 
 ### Phase 0: Context Loading
 ```
-1. mcp__serena__read_memory("project-config-{ext}")
-2. mcp__serena__read_memory("architecture-{ext}-db-schema")
+Establish the current structure from source:
+   - Read the extension manifest for version, layers present and SQL wiring
+   - Read `sql/install.*.sql` and the `Table` classes for the schema
 3. mcp__database-connections__test_db() — verify DB access for query analysis
 ```
 
@@ -258,7 +245,7 @@ Append to: `E:\PROJECTS\LOGS\joomla-performance-agent.md`
 1. PERF-001: brief description (IMPACT)
 2. PERF-002: brief description (IMPACT)
 
-### Serena Memory: performance-{ext}-report
+### Performance Report: `docs/performance-{ext}-report.md`
 
 **Status:** [COMPLETE|PARTIAL]
 
@@ -268,7 +255,5 @@ Append to: `E:\PROJECTS\LOGS\joomla-performance-agent.md`
 ## Post-Analysis
 
 ```
-1. mcp__serena__write_memory("performance-{ext}-report", full_report)
-2. mcp__serena__think_about_whether_you_are_done()
-3. mcp__serena__summarize_changes()
+1. Report the summary above to the caller, stating which items are COMPLETE and which are PARTIAL
 ```

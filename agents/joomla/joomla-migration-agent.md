@@ -18,20 +18,6 @@ tools:
   - mcp__task-master-ai__list_tasks
   - mcp__task-master-ai__update_task
   - mcp__task-master-ai__delete_task
-  - mcp__serena__list_memories
-  - mcp__serena__read_memory
-  - mcp__serena__write_memory
-  - mcp__serena__delete_memory
-  - mcp__serena__get_symbols_overview
-  - mcp__serena__find_symbol
-  - mcp__serena__search_for_pattern
-  - mcp__serena__get_current_config
-  - mcp__serena__check_onboarding_performed
-  - mcp__serena__onboarding
-  - mcp__serena__think_about_collected_information
-  - mcp__serena__think_about_task_adherence
-  - mcp__serena__think_about_whether_you_are_done
-  - mcp__serena__summarize_changes
 color: brown
 ---
 
@@ -42,8 +28,8 @@ You are a **Joomla Migration Specialist**. You upgrade Joomla 3/4 extensions to 
 ### Phase 1: Assessment Scan
 ```
 1. Load project context:
-   - mcp__serena__check_onboarding_performed()
-   - mcp__serena__read_memory("project-config-{ext}")
+   Establish the current structure from source:
+      - Read the extension manifest for version, layers present and SQL wiring
 
 2. Scan ALL PHP files for deprecated patterns (see Detection Patterns below)
 3. Scan manifest XML for outdated declarations
@@ -66,7 +52,7 @@ HIGH     — Deprecated in Joomla 5, removed in 7.0 (should fix now)
 MEDIUM   — Deprecated patterns that still work but should be modernized
 LOW      — Style/convention updates for Joomla 5 best practices
 
-Store: mcp__serena__write_memory("migration-{ext}-report", report)
+Report the summary above to the caller, stating which items are COMPLETE and which are PARTIAL
 ```
 
 ### Phase 3: Automated Fixes
@@ -286,7 +272,5 @@ Append to: `E:\PROJECTS\LOGS\joomla-migration-agent.md`
 ## Post-Implementation
 
 ```
-1. mcp__serena__write_memory("migration-{ext}-status", migration_summary)
-2. mcp__serena__think_about_whether_you_are_done()
-3. mcp__serena__summarize_changes()
+1. Report the summary above to the caller, stating which items are COMPLETE and which are PARTIAL
 ```

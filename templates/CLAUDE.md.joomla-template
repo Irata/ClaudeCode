@@ -148,7 +148,7 @@ Additional libraries:
 
 2. **Architecture** → `joomla-architect`
    - Designs extension structure, namespace map, DI wiring, database schema
-   - Stores decisions in Serena memory
+   - Writes decisions to `docs/architecture/`
    - **Always run this before building**
 
 3. **Implementation** (Parallel) → Choose builders based on extension type:
@@ -191,14 +191,11 @@ Additional libraries:
 - You know exactly which agent you need
 - Faster for focused, well-defined tasks
 
-### Agent Context Sharing (Serena Memory)
+### Agent Context Sharing
 
-Agents share context via Serena memory files. Convention:
-
-- `project-config-{{PROJECT_NAME}}` — Project configuration
-- `architecture-{{COMPONENT_NAME}}-*` — Architecture decisions (namespace-map, di-wiring, db-schema, etc.)
-- `task-context-{{TASK_ID}}` — Per-task context when using orchestrator
-- `build-status-{{COMPONENT_NAME}}-*` — Build progress tracking
+Per-task context travels in the Task prompt the orchestrator writes when it
+delegates. Anything that must outlive the task is a document in the repository
+under `docs/architecture/` — see the conventions below.
 
 ### Available Agents
 
@@ -210,34 +207,29 @@ Skills are symlinked from `E:\repositories\ClaudeCode\skills\` into each project
 
 @includes/available-skills.md
 
-## Serena Memory Conventions
+## Architecture Document Conventions
 
-### Project Memories
-- `project-config-{{PROJECT_NAME}}` — Project configuration
-- `prd-{ext}-requirements` — Product requirements (per extension)
+Written by the architect, read by the builders. One file per topic, per extension.
 
-### Architecture Memories (per extension)
-- `architecture-{ext}-namespace-map`
-- `architecture-{ext}-di-wiring`
-- `architecture-{ext}-db-schema`
-- `architecture-{ext}-class-hierarchy`
-- `architecture-{ext}-event-flow`
-- `architecture-{ext}-acl-matrix`
-- `architecture-{ext}-routing`
-- `architecture-{ext}-api-design`
+### Requirements
+- `docs/PRD-{ext}.md` — Product requirements
 
-### Build Status Memories (per extension)
-- `build-{ext}-admin-status`
-- `build-{ext}-site-status`
-- `build-{ext}-api-status`
-- `build-{ext}-cli-status`
+### Architecture (per extension)
+- `docs/architecture/{ext}-namespace-map.md`
+- `docs/architecture/{ext}-di-wiring.md`
+- `docs/architecture/{ext}-db-schema.md`
+- `docs/architecture/{ext}-class-hierarchy.md`
+- `docs/architecture/{ext}-event-flow.md`
+- `docs/architecture/{ext}-acl-matrix.md`
+- `docs/architecture/{ext}-routing.md`
+- `docs/architecture/{ext}-api-design.md`
 
-### Quality Memories (per extension)
-- `review-{ext}-findings`
-- `security-{ext}-audit-report`
-- `performance-{ext}-report`
-- `test-{ext}-status`
-- `language-{ext}-audit-status`
+### Quality Reports (per extension)
+- `docs/security-{ext}-audit-report.md`
+- `docs/performance-{ext}-report.md`
+
+Builders and reviewers report their status to the orchestrator in their reply
+rather than writing a status file.
 
 ## Quick Start Checklist
 
