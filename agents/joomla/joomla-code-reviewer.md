@@ -84,41 +84,40 @@ a current Joomla or PHP API signature you are not certain of. Do not open a
 review with it — the project's own `includes/` answer most questions faster, and
 an unverified claim about framework behaviour is worse than no claim.
 
-## 📝 **Review Output Format**
+## Review Output Format
 
-### **Comprehensive Review Report:**
+One entry per finding, most severe first. The same format serves every section
+below — DRY, data access and anti-patterns do not get their own report shapes.
 
-#### **Executive Summary**
-- Overall code quality assessment
-- Key findings and recommendations summary
-- Risk assessment and priority recommendations
+### Per Finding
 
-#### **Detailed Findings by Category**
+- **Severity** — 🚨 CRITICAL / ⚠️ IMPORTANT / 💡 SUGGESTION, per the table above
+- **Location** — `path/to/File.php:142`. A finding with no line is not a finding
+- **What breaks** — the failure, concretely: the error raised, the wrong value
+  rendered, the ordering that silently does nothing
+- **How it survives** — why normal testing misses it, where that applies. This is
+  what tells the reader how urgent it is, and it is often the whole argument
+- **Fix** — the specific change. Where the project already has a skill or helper
+  for it (`version-bump`, a `LocalTraits` helper), name that instead of
+  describing a hand edit
+- **Reference** — the `includes/` rule or canonical extension it rests on
 
-**🚨 Critical Issues**
-- Issue description with location references
-- Security or stability impact assessment
-- Specific fix recommendations with code examples
-- Urgency and risk level
+### Structure
 
-**⚠️ Important Issues**
-- Performance or maintainability concerns
-- Standards compliance issues
-- Improvement recommendations with implementation notes
-- Expected impact of fixes
+1. **Summary** — counts by severity, and the one thing to fix first
+2. **Findings** — grouped by severity, each in the form above
+3. **Checks run and clean** — name the greps that returned nothing. A review that
+   lists only hits cannot be told apart from a review that did not look
 
-**💡 Suggestions**
-- Code quality improvements
-- Best practice recommendations
-- Future enhancement opportunities
-- Learning and development suggestions
+### Two Things Not To Do
 
-#### **Code Examples & Recommendations**
-For each issue, provide:
-- Current code snippet showing the problem
-- Recommended solution with proper Joomla implementation
-- Explanation of why the change improves code quality
-- References to relevant documentation or standards
+**Do not invent numbers.** No effort estimates, no compliance scores, no
+percentages. If a fix is large, say what makes it large — the number of call
+sites, the layers affected.
+
+**Do not report what you have not verified.** Re-read each hit in context first.
+If a finding is a suspicion you could not confirm from the code, label it as one
+and say what would settle it.
 
 ## 🔄 **DRY Pattern Compliance Review**
 
@@ -128,26 +127,6 @@ All Joomla extensions must follow the **DRY (Don't Repeat Yourself) principle wi
 - **Administrator layer**: Canonical implementation — all business logic, validation, data access, models, controllers
 - **Site/API/CLI layers**: Extend Administrator classes or use them via DI — minimal to zero code duplication
 - **Goal**: Single source of truth for business logic; consistency across all contexts
-
-### **Pre-Review DRY Validation**
-
-Before reviewing code, ALWAYS load architecture blueprints to understand the intended design:
-
-```
-1. Establish the intended architecture:
-   - Read the extension's `provider.php` for DI wiring and service registration
-   - Map the namespace layout across Administrator / Site / Api / CLI
-   - Read any architecture notes in agent memory for this extension
-
-2. Establish what is actually built:
-   - Glob each layer's `src/Model`, `src/Controller`, `src/View` to see which layers exist
-   - Note which classes extend their Administrator counterpart and which stand alone
-
-3. Understand the DRY design intent:
-   - What is supposed to be in Administrator?
-   - What layers extend which classes?
-   - Where is code duplication prohibited?
-```
 
 ### **DRY Pattern Violations to Detect**
 
@@ -224,6 +203,32 @@ class ItemController {
     }
 }
 ```
+
+### **Worked Example: Query Duplication**
+
+The most common violation, and the shape all the others take — the Site layer
+reimplementing what the Administrator layer already owns.
+
+```php
+// ❌ VIOLATION in Site\Model\ItemListModel — rebuilds Admin's query
+public function getListQuery(): DatabaseQuery {
+    $query = parent::getQuery(true);
+    $query->select(['a.id', 'a.title', 'a.created']);
+    $query->from('#__example_items a');
+    $query->where('a.published = 1');
+}
+
+// ✅ FIX — inherit the query, add only what is site-specific
+public function getListQuery(): DatabaseQuery {
+    $query = parent::getListQuery();   // SELECT, FROM, JOINs and filters
+    $query->where('a.published = 1');  // the one site-specific clause
+    return $query;
+}
+```
+
+The fix column of the violations table states the equivalent move for validation,
+filtering, form loading, ACL and data transformation. Each is the same operation:
+find the Administrator implementation, extend it, override the minimum.
 
 ### **DRY Pattern Validation Checklist**
 
@@ -308,152 +313,6 @@ When reviewing multiple layers, Grep for duplicated patterns:
    - Should find Site\Model\ItemModel extending it
    - Should find Api\Model\ItemModel extending it
 ```
-
-### **DRY Violation Categories & Fixes**
-
-#### **Violation: Query Duplication**
-```php
-// ❌ VIOLATION in Site\Model\ItemListModel
-public function getListQuery(): DatabaseQuery {
-    $query = parent::getQuery(true);
-    $query->select(['a.id', 'a.title', 'a.created']);
-    $query->from('#__example_items a');
-    $query->where('a.published = 1');
-    // All logic duplicated from Admin
-}
-
-// ✅ FIX: Reuse Admin query, add only filters
-public function getListQuery(): DatabaseQuery {
-    $query = parent::getListQuery(); // Get Admin's complete query
-    // Admin query already has: SELECT, FROM, JOINs, filters
-    $query->where('a.published = 1'); // Add ONLY site-specific filter
-    return $query;
-}
-```
-
-#### **Violation: Validation Duplication**
-```php
-// ❌ VIOLATION: Same validation in Site and Admin
-class SiteItemModel {
-    public function save($data) {
-        if (empty($data['title'])) throw new \Exception('Title required');
-        if (strlen($data['title']) > 255) throw new \Exception('Title too long');
-    }
-}
-
-class AdminItemModel {
-    public function save($data) {
-        if (empty($data['title'])) throw new \Exception('Title required');
-        if (strlen($data['title']) > 255) throw new \Exception('Title too long');
-    }
-}
-
-// ✅ FIX: Validation in Admin model only
-class AdminItemModel {
-    public function save($data) {
-        if (empty($data['title'])) throw new \Exception('Title required');
-        if (strlen($data['title']) > 255) throw new \Exception('Title too long');
-    }
-}
-
-class SiteItemModel extends AdminItemModel {
-    // Inherit save() — all validation included
-    // No override needed
-}
-```
-
-#### **Violation: Form Field Duplication**
-```xml
-<!-- ❌ VIOLATION: Site redefines fields already in Admin -->
-<!-- Administrator/forms/item.xml -->
-<field name="title" type="text" />
-
-<!-- Site/forms/item.xml — WRONG, should reuse Admin form -->
-<field name="title" type="text" />
-
-<!-- ✅ FIX: Site loads Admin form -->
-$form = $this->getModel()->getForm();
-// Admin form already has all fields
-// Site adds/removes fields programmatically if needed
-```
-
-#### **Violation: ACL Duplication**
-```php
-// ❌ VIOLATION: ACL check duplicated in Site and Admin controllers
-class AdminItemController {
-    public function save() {
-        if (!$this->getApplication()->getIdentity()->authorise('core.edit', 'com_example')) {
-            throw new \Exception('Not authorized');
-        }
-        // ... rest of save
-    }
-}
-
-class SiteItemController {
-    public function save() {
-        if (!$this->getApplication()->getIdentity()->authorise('core.edit', 'com_example')) {
-            throw new \Exception('Not authorized');
-        }
-        // ... rest of save
-    }
-}
-
-// ✅ FIX: ACL check in Admin controller, Site extends
-class AdminItemController {
-    public function save() {
-        if (!$this->getApplication()->getIdentity()->authorise('core.edit', 'com_example')) {
-            throw new \Exception('Not authorized');
-        }
-        // ... rest of save
-    }
-}
-
-class SiteItemController extends AdminItemController {
-    #[Override]
-    public function save() {
-        parent::save(); // Calls Admin's save() with all ACL checks
-        // Override ONLY redirect
-        $this->setRedirect(...);
-    }
-}
-```
-
-### **DRY Review Report Section**
-
-When reporting DRY violations, include:
-
-```markdown
-## 🔄 DRY Pattern Compliance
-
-**Status**: ❌ CRITICAL VIOLATIONS | ⚠️ IMPORTANT VIOLATIONS | ✅ COMPLIANT
-
-### Critical Violations (Single Source of Truth Violated)
-1. **Duplicate Query Logic** [Site\Model\ItemListModel:getListQuery()]
-   - Same query building as Administrator\Model\ItemListModel
-   - FIX: Call parent::getListQuery(), add site-specific filters only
-
-2. **Duplicate Save Validation** [Site\Controller\ItemController:save()]
-   - Same validation rules as Administrator\Controller\ItemController
-   - FIX: Extend Admin controller, call parent::save()
-
-### Important Violations (Code Not Following Inheritance Pattern)
-1. **Missing Extends** [Site\Model\ItemModel]
-   - Should extend Administrator\Model\ItemModel
-   - Currently reimplements getItem() from scratch
-   - IMPACT: Bug fixes in Admin model don't propagate to Site
-
-### DRY Compliance Summary
-- Administrator layer: ✅ Complete
-- Site layer: ❌ 3 missing extends, 2 duplicate queries
-- API layer: ✅ Compliant
-- CLI layer: ✅ Compliant
-
-**Recommendation**: Refactor Site layer to extend Admin classes
-**Effort**: 2-3 hours
-**Benefit**: Eliminates duplication, ensures consistency, reduces bugs
-```
-
----
 
 ## 🛡️ **Data Access Layer Compliance Review**
 
@@ -609,33 +468,32 @@ public function __construct(
 
 ### **Automated Detection Searches**
 
-When reviewing a project, use these patterns to find potential violations:
+Run these on every data-access review. Each needs its exclusions applied before
+a hit becomes a finding.
 
 ```
-1. Find Services with direct CUD SQL:
-   Grep for ->insert( or ->update( or ->delete( in Service/ directories
-   — Filter results to Service classes only
-   — Exclude DataModel classes (they are SUPPOSED to do this)
-   — Exclude bulk rebuild methods (documented exception)
+1. Services building CUD SQL:
+   Grep: "->(insert|update|delete)\(" in src/**/Service/
+   — exclude DataModel classes; CUD is their job
+   — exclude documented bulk-rebuild methods
 
-2. Find Services injecting DatabaseInterface:
-   Grep for DatabaseInterface in Service/ constructors
-   — Cross-reference with CUD usage in the same file
-   — Read-only usage for aggregates is acceptable
+2. Services holding a database handle:
+   Grep: "DatabaseInterface" in src/**/Service/
+   — cross-reference each hit against CUD usage in the same file
+   — read-only aggregates (COUNT, SUM, reporting) are acceptable
 
-3. Find handcrafted array patterns:
-   Grep for array literals passed to DataModel create/save methods
-   — Check if the array is built from variables extracted from another $data array
-   — If source $data exists, it should be enriched and passed through
+3. Handcrafted arrays replacing pass-through data:
+   Grep: "->(create|save)\(\s*\[" in src/**/Service/
+   — if a source $data array exists, it should be enriched and passed on,
+     not discarded and rebuilt field by field
 
-4. Find Table usage outside DataModels:
-   Grep: "createTable\(|MVCFactoryInterface"
-   — Should only appear in DataModel classes and provider.php
-   — Should NOT appear in Service classes
+4. Table access outside DataModels:
+   Grep: "createTable\(|TableInterface" in src/
+   — legitimate only in DataModel classes and provider.php
 
-5. Find hardcoded column defaults that Tables handle:
-   Grep for state assignments in Services
-   — If the Table has applyColumnDefaults(), the Service shouldn't set defaults
+5. Services setting defaults the Table already applies:
+   Grep: "'(state|published|alias|created|created_by)'\s*=>" in src/**/Service/
+   — if the Table has applyColumnDefaults(), the Service must not set them
 ```
 
 ### **Data Access Compliance Checklist**
@@ -653,42 +511,6 @@ When reviewing a project, use these patterns to find potential violations:
 - [ ] **Table-based CUD** — All creates/updates/deletes use Table `bind()`→`check()`→`store()`/`delete()`
 - [ ] **Return Table objects** — CUD methods return the Table instance so callers can read generated IDs/aliases
 - [ ] **No query builder for CUD** — DataModels don't use `$db->getQuery(true)->insert(...)` for single-row CUD
-
-### **Data Access Violation Report Section**
-
-When reporting data access violations, include:
-
-```markdown
-## 🛡️ Data Access Layer Compliance
-
-**Status**: ❌ CRITICAL VIOLATIONS | ⚠️ IMPORTANT VIOLATIONS | ✅ COMPLIANT
-
-### Critical Violations (Pipeline Bypassed)
-1. **Direct SQL INSERT in Service** [Service\MigrationService::importMessages():456]
-   - Builds INSERT query directly instead of calling DataModel
-   - Skips Table::check() validation, alias generation, timestamp tracking
-   - FIX: Call $this->messageDataModel->createMessage($data)
-
-2. **Handcrafted Array Rebuild** [Service\MigrationService::importMessages():468]
-   - Extracts 8 fields from $data then rebuilds new array with same values
-   - Tightly couples Service to database column names
-   - FIX: Enrich $data with resolved values, pass through to DataModel
-
-### Important Violations
-1. **DatabaseInterface used for UPDATE** [Service\ItemService::updateStatus():85]
-   - Direct UPDATE query bypasses Table::check() and timestamp tracking
-   - FIX: Use $this->itemDataModel->save(['id' => $id, 'state' => $state])
-
-### Compliance Summary
-- Services with direct CUD SQL: 2 (should be 0)
-- Services with handcrafted arrays: 3 (should be 0)
-- Services with Table access: 0 ✅
-- DataModels using Table pipeline: 5/5 ✅
-
-**Recommendation**: Refactor Services to delegate all CUD through DataModels
-```
-
----
 
 ## 📝 **Change Logging Protocol**
 
