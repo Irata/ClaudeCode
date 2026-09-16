@@ -919,6 +919,39 @@ sets and compare `required`, `readonly`, `default` and `filter` per field.
 Report the differences as a table; let the layout, not the form, decide what is
 displayed where.
 
+### `@since` Tags Not Tracking the Manifest (⚠️ IMPORTANT)
+
+New or changed symbols must carry the owning extension's **current manifest
+`<version>`**. The two failure modes are guessing the value and copying the
+highest `@since` already in the file — existing tags drift, so the codebase is
+not a reliable source for its own convention.
+
+**Rule:** read the manifest, then write the tag. A change spanning more than one
+extension uses **each extension's own** manifest version for its own files — a
+plugin's source takes the plugin manifest version even when the component table
+it touches takes the component's.
+
+**Detection:**
+- Read `<version>` from the manifest that owns each changed file
+- `Grep: "@since\s+"` across the changed files; flag any new symbol whose tag is
+  not that manifest version
+- Flag a tag that matches the *highest existing* `@since` rather than the
+  manifest — the signature of a copied value
+- Flag `@since __DEPLOY_VERSION__` left unreplaced
+- Pre-existing symbols keep their original tag: only flag tags on symbols the
+  change actually adds or alters
+
+**Why it survives:** nothing reads `@since` at runtime, so it is never wrong in
+a way that breaks. It degrades quietly until the tags no longer indicate when
+anything was introduced, at which point they have to be corrected in bulk.
+
+**Fix:** correct the tags in the change under review. Where a whole extension has
+drifted, report it rather than fixing it inline — that is a `version-bump` skill
+job, not a review edit.
+
+Reference: `includes/joomla-coding-preferences.md` → "PHPDoc `@since` Tags —
+Track the Manifest Version", and "Version Synchronisation (V.R.M)".
+
 ### Deprecated Functions
 - **`jexit()`**: Deprecated since 4.0, removed in 6.0. Flag any usage. Use `$this->checkToken()` in controllers or throw an exception.
 - **`Session::checkToken() || jexit()`**: The entire pattern is deprecated. Replace with `$this->checkToken()`.
