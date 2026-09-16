@@ -8,6 +8,10 @@
         "-y",
         "@upstash/context7-mcp"
       ]
+    },
+    "phpstorm": {
+      "type": "http",
+      "url": "http://127.0.0.1:64442/stream"
     }
   }
 }

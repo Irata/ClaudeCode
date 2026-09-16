@@ -1,0 +1,42 @@
+# PHPStan configuration for a Joomla extension repository.
+#
+# Copy to the repository root as phpstan.neon and edit the marked values. The
+# extension source is not standalone-autoloadable — it needs Joomla's classes —
+# so scanDirectories points at the development Joomla instance this extension is
+# symlinked into. scanDirectories makes classes known without analysing them.
+#
+# Run (PHPStan installed standalone, not as a project dependency):
+#   /e/MCP_Servers/tools-phpstan/vendor/bin/phpstan.bat analyse \
+#       -c phpstan.neon --no-progress --memory-limit=1G
+#
+# NOTE: PHP emits "Module already loaded" warnings on this machine which corrupt
+# --error-format=json output. Strip everything before the first "{" when parsing.
+
+parameters:
+    # Level 0 already catches the highest-value defects: unknown classes,
+    # undefined methods, missing returns on a declared return type. Raise it
+    # once level 0 is clean, not before.
+    level: 0
+
+    paths:
+        - admin/com_EXTENSION/src
+        - api/com_EXTENSION/src
+        - plugins
+
+    scanDirectories:
+        # Joomla core and its dependencies
+        - E:/www/INSTANCE/libraries/src
+        - E:/www/INSTANCE/libraries/vendor
+        # Sibling extensions this one calls into. Omitting one turns every
+        # cross-extension reference into a false "class not found" — add each
+        # data-layer extension this repository actually depends on.
+        - E:/www/INSTANCE/administrator/components/com_entitydata
+        - E:/www/INSTANCE/administrator/components/com_accountingdata
+
+    treatPhpDocTypesAsCertain: false
+    reportUnmatchedIgnoredErrors: false
+
+    # Generate with --generate-baseline once the real findings are triaged, so
+    # existing debt is recorded and new code is held to a clean bar.
+    # includes:
+    #     - phpstan-baseline.neon
