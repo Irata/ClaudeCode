@@ -13,11 +13,7 @@ tools:
   - Task
   - mcp__Context7__resolve-library-id
   - mcp__Context7__get-library-docs
-  - mcp__sequential-thinking__sequentialthinking
-  - mcp__task-master-ai__create_task
-  - mcp__task-master-ai__list_tasks
-  - mcp__task-master-ai__update_task
-  - mcp__task-master-ai__delete_task
+  - TodoWrite
 color: red
 ---
 

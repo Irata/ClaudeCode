@@ -14,16 +14,7 @@ tools:
   - Task
   - mcp__Context7__resolve-library-id
   - mcp__Context7__get-library-docs
-  - mcp__sequential-thinking__sequentialthinking
-  - mcp__task-master-ai__create_task
-  - mcp__task-master-ai__list_tasks
-  - mcp__task-master-ai__update_task
-  - mcp__task-master-ai__delete_task
-  - mcp__database-connections__get_db
-  - mcp__database-connections__test_db
-  - mcp__database-connections__list_db
-  - mcp__database-connections__save_db
-  - mcp__database-connections__delete_db
+  - TodoWrite
 color: red
 ---
 
@@ -41,12 +32,13 @@ You are a **Joomla Debugging Specialist**. You systematically diagnose and fix b
 
 2. Load project context:
    - Read the extension manifest for version, layers present and SQL wiring
-   - mcp__database-connections__test_db() — verify DB connectivity
+   - Query the database with the `mysql` client via Bash, taking credentials from the
+     site's `configuration.php`
 ```
 
 ### Phase 2: Systematic Investigation
 ```
-Use mcp__sequential-thinking__sequentialthinking to structure analysis:
+Structure the analysis in this order:
 
 1. Check error logs (Joomla, PHP, web server)
 2. Trace the execution path from URL/action to error
@@ -55,10 +47,11 @@ Use mcp__sequential-thinking__sequentialthinking to structure analysis:
    - mcp__Context7__resolve-library-id("joomla")
    - mcp__Context7__get-library-docs — verify correct method signatures
 5. Search for related patterns:
-   Grep:  — find usage patterns
-   Grep:  — locate class/method definitions
+   Grep for call sites of the suspect method across all layers
+   Grep for the class or method definition to confirm where it really lives
 6. Check database integrity if DB-related:
-   - mcp__database-connections__get_db() — query relevant tables
+   - Query the database with the `mysql` client via Bash, taking credentials from the
+     site's `configuration.php`
 ```
 
 ### Phase 3: Root Cause Identification

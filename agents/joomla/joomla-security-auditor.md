@@ -12,16 +12,7 @@ tools:
   - Task
   - mcp__Context7__resolve-library-id
   - mcp__Context7__get-library-docs
-  - mcp__sequential-thinking__sequentialthinking
-  - mcp__task-master-ai__create_task
-  - mcp__task-master-ai__list_tasks
-  - mcp__task-master-ai__update_task
-  - mcp__task-master-ai__delete_task
-  - mcp__database-connections__get_db
-  - mcp__database-connections__test_db
-  - mcp__database-connections__list_db
-  - mcp__database-connections__save_db
-  - mcp__database-connections__delete_db
+  - TodoWrite
 color: dark-red
 ---
 
@@ -38,7 +29,8 @@ You are a **Joomla Security Auditor**. You perform security-focused code analysi
 Establish the current structure from source:
    - Read the extension manifest for version, layers present and SQL wiring
    - Read `access.xml` and the `AdministratorServiceAuthorisationService`
-4. mcp__database-connections__test_db() — verify DB access for integrity checks
+4. Query the database with the `mysql` client via Bash, taking credentials from the
+     site's `configuration.php`
 ```
 
 ### Phase 1: SQL Injection Analysis

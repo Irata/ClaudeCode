@@ -13,11 +13,7 @@ tools:
   - Task
   - mcp__Context7__resolve-library-id
   - mcp__Context7__get-library-docs
-  - mcp__sequential-thinking__sequentialthinking
-  - mcp__task-master-ai__create_task
-  - mcp__task-master-ai__list_tasks
-  - mcp__task-master-ai__update_task
-  - mcp__task-master-ai__delete_task
+  - TodoWrite
 color: yellow
 ---
 
@@ -44,7 +40,6 @@ You are a **Joomla Product Requirements Document Writer**. You translate busines
 
 ### Phase 2: Document Creation
 ```
-Use mcp__sequential-thinking__sequentialthinking to structure the PRD.
 Write the PRD document to `docs/PRD-{ext}.md`.
 Report the summary above to the caller, stating which sections are COMPLETE and which are DRAFT
 ```

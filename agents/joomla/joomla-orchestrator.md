@@ -13,11 +13,7 @@ tools:
   - Task
   - mcp__Context7__resolve-library-id
   - mcp__Context7__get-library-docs
-  - mcp__sequential-thinking__sequentialthinking
-  - mcp__task-master-ai__create_task
-  - mcp__task-master-ai__list_tasks
-  - mcp__task-master-ai__update_task
-  - mcp__task-master-ai__delete_task
+  - TodoWrite
 color: green
 ---
 
@@ -105,7 +101,7 @@ Delegate to: joomla-build-agent
 ### Phase 7: Verification & Handoff
 ```
 1. Review all agent outputs
-2. Verify task completion via TaskMaster-AI
+2. Verify every todo is complete
 5. Present summary to user for human verification
 ```
 
@@ -145,13 +141,12 @@ Context for a single delegated task travels in that agent's Task prompt, not
 through a shared store. Anything durable enough to outlive the task belongs in
 one of the documents above.
 
-## TaskMaster-AI Integration
+## Task Tracking
 
-Use TaskMaster-AI to create and track the overall development plan:
-- Create parent tasks for each phase
-- Create child tasks for each agent delegation
-- Update task status as agents complete work
-- Use task dependencies to enforce phase ordering
+Use TodoWrite to create and track the overall development plan:
+- One todo per phase, expanded into one per agent delegation as the phase starts
+- Update status as agents complete work
+- Keep phase ordering explicit: architect before builders, builders before quality
 
 ## Decision Framework
 

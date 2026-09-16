@@ -1,24 +1,5 @@
 {
   "mcpServers": {
-    "task-master-ai": {
-      "command": "node",
-      "args": [
-        "E:\\PROJECTS\\taskmaster-ai/index.js"
-      ],
-      "cwd": "E:\\PROJECTS\\taskmaster-ai",
-      "env": {
-        "ANTHROPIC_API_KEY": "XXXXX"
-      }
-    },
-    "database-connections": {
-      "command": "node",
-      "args": [
-        "E:\\MCP_Servers\\database-connection-mcp\\index.js"
-      ],
-      "env": {
-        "DB_ENCRYPTION_KEY": "XXXXXX"
-      }
-    },
     "Context7": {
       "command": "cmd",
       "args": [
@@ -26,15 +7,6 @@
         "npx",
         "-y",
         "@upstash/context7-mcp"
-      ]
-    },
-    "sequential-thinking": {
-      "command": "cmd",
-      "args": [
-        "/c",
-        "npx",
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
       ]
     }
   }

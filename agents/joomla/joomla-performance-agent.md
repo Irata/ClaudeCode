@@ -11,16 +11,7 @@ tools:
   - Task
   - mcp__Context7__resolve-library-id
   - mcp__Context7__get-library-docs
-  - mcp__sequential-thinking__sequentialthinking
-  - mcp__task-master-ai__create_task
-  - mcp__task-master-ai__list_tasks
-  - mcp__task-master-ai__update_task
-  - mcp__task-master-ai__delete_task
-  - mcp__database-connections__get_db
-  - mcp__database-connections__test_db
-  - mcp__database-connections__list_db
-  - mcp__database-connections__save_db
-  - mcp__database-connections__delete_db
+  - TodoWrite
 color: gold
 ---
 
@@ -37,7 +28,8 @@ You are a **Joomla Performance Analysis Specialist**. You analyze Joomla extensi
 Establish the current structure from source:
    - Read the extension manifest for version, layers present and SQL wiring
    - Read `sql/install.*.sql` and the `Table` classes for the schema
-3. mcp__database-connections__test_db() — verify DB access for query analysis
+3. Query the database with the `mysql` client via Bash, taking credentials from the
+     site's `configuration.php`
 ```
 
 ### Phase 1: Database Query Efficiency

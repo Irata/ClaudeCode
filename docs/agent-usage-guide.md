@@ -6,9 +6,6 @@
 
 1. **MCP Servers** must be running:
    - Context7 — Joomla documentation access
-   - Sequential Thinking — structured analysis
-   - TaskMaster-AI — task planning and tracking
-   - Database Connections — database access
 
 2. **Claude Code** installed with agent support
 
@@ -183,7 +180,7 @@ The orchestrator follows a phased approach:
 
 ### Monitoring Progress
 
-The orchestrator creates tasks in TaskMaster-AI. You can ask:
+The orchestrator tracks progress with TodoWrite. You can ask:
 - "What's the current status of all tasks?"
 - "Show me the task list"
 - "What phase are we in?"
@@ -730,10 +727,10 @@ These documents (`docs/PROJECT-ECOSYSTEM.md` and `docs/INTERPROJECT-REFERENCES.m
 - Try `mcp__Context7__resolve-library-id("joomla")` to verify connectivity
 - Check `includes/context7.json` for correct library definitions
 
-### Database Connection Fails
-- Verify Database Connections MCP server is running
-- Check the connection name matches what's in CLAUDE.md
-- Use `mcp__database-connections__test_db()` to diagnose
+### Database Access Fails
+- Check the credentials in the site's `configuration.php`
+- Confirm the MySQL/MariaDB service is running
+- Diagnose with the `mysql` client via Bash before assuming an application fault
 
 ### Agent Writes Code That Doesn't Follow Blueprints
 - Ensure the architect has written its blueprints before builders start
