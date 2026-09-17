@@ -14,6 +14,22 @@ History before 2026-09-16 is in the git log.
 
 ## [Unreleased]
 
+### Fixed
+
+- **MCP servers are documented as needing registration.** `includes/.mcp.json` is
+  linked into `.claude\includes\`, but Claude Code reads `.mcp.json` only from a
+  project root — so no server defined there, including the five removed on
+  2026-09-16, has ever loaded in a project. That, rather than disuse, is why none
+  was ever called. The README's new "MCP Servers" section and
+  `includes/joomla-devel-environment.md` give the registration commands, and note
+  that the agents list Context7's tools but not PhpStorm's.
+  **Action required:** register Context7 and phpstorm once per machine to use them.
+- **README brought up to date with the 2026-09-16 changes.** It still described
+  per-file symlinks with a confirmation prompt for each file, and said every script
+  needs Administrator rights. It now covers junction-based linking and the
+  migration script, which scripts still need elevation, the `/ship` skill, the new
+  template and includes, how agents hand work to each other, and how to update.
+
 ## [2026-09-17]
 
 ### Added
@@ -97,14 +113,15 @@ rebuilds the code reviewer around checks drawn from those defects.
   merges to `main`, deletes the branch and pushes. It checks each commit's actual
   contents with `git show --stat`, because `git commit` takes the whole index and a
   previously staged file otherwise lands silently under the wrong message.
-- **PhpStorm MCP server**, registered as `phpstorm` — PhpStorm's own index exposed
+- **PhpStorm MCP server**, defined as `phpstorm` — PhpStorm's own index exposed
   to Claude Code: symbol lookup, call analysis, structural search, inspections with
   quick fixes, database introspection and Xdebug control. It replaces what Serena
   was meant to provide, backed by the index the IDE already maintains.
-  **Action required:** PhpStorm must be running with its MCP server enabled, and
-  the port is assigned by the IDE — the one in `includes/.mcp.json` is specific to
-  the machine it was set up on. `includes/joomla-devel-environment.md` explains how
-  to find yours.
+  **Action required:** register it once per machine with `claude mcp add`, and keep
+  PhpStorm running with its MCP server enabled — see "MCP Servers" in the README.
+  *Corrected 2026-09-17: this entry originally said the server was registered in
+  `includes/.mcp.json`. Claude Code does not read that file, so no server defined
+  there has ever loaded in a project.*
 - **PHPStan setup** — `templates/phpstan.neon.dist` and usage notes in
   `includes/joomla-devel-environment.md`. Level 0 is the recommended starting
   point: it is where "call to an undefined method" is caught — a fatal that

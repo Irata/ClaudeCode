@@ -70,12 +70,19 @@ If two server entries exist (e.g. port 443 and default), both need the same dual
 
 PhpStorm exposes its own index to Claude Code over MCP — symbol lookup, call
 analysis, structural search, its full inspection set with quick-fix names, the
-database tools, and Xdebug session control. It is registered in
-`includes/.mcp.json` as `phpstorm`, an HTTP transport:
+database tools, and Xdebug session control. Its definition is kept in
+`includes/.mcp.json`, but **Claude Code does not read that file** — it loads
+`.mcp.json` only from a project root, and this one is linked into
+`.claudeincludes`. Register the server once per machine at user scope instead,
+which makes it available in every project:
 
-```json
-"phpstorm": { "type": "http", "url": "http://127.0.0.1:64442/stream" }
+```bash
+claude mcp add --scope user --transport http phpstorm http://127.0.0.1:<port>/stream
 ```
+
+Confirm it from a project directory with `claude mcp list`. Its tools reach the
+main session only — the Joomla agents do not list them, so agents cannot call
+them.
 
 **The port is assigned by the IDE and is not guaranteed stable across upgrades.**
 If the server stops answering, rediscover it rather than guessing — find the
@@ -90,7 +97,8 @@ curl -s -i -X POST "http://127.0.0.1:<port>/stream" \
 ```
 
 The port that returns an `mcp-session-id` header and a `PhpStorm MCP Server`
-`serverInfo` is the one. Update the URL in `includes/.mcp.json`.
+`serverInfo` is the one. Re-register with that port: `claude mcp remove phpstorm
+--scope user`, then the `claude mcp add` command above.
 
 **PhpStorm must be running.** The server lives inside the IDE, so every tool here
 fails when it is closed. This is a working-session tool, not something a
