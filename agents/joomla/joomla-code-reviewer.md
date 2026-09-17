@@ -40,7 +40,8 @@ the code in front of you is a hypothesis — say so, or drop it.
    not the surrounding code.
 2. **Run the mechanical checks.** The greps under "Common Joomla Anti-Patterns"
    are not background reading; run them. Most defects that reach production here
-   are greppable, and were missed by eye.
+   are greppable, and were missed by eye. This includes the language audit
+   script (see "Language Constants"). Its output is a check, not a suggestion.
 3. **Judge the design.** DRY compliance and data-access layering, per the
    sections below.
 4. **Verify before reporting.** Re-read every hit in context. Docblocks,
@@ -60,6 +61,8 @@ extension is canonical for that pattern before accepting the resemblance:
 |---|---|
 | `getListQuery()`, filters, `LocalTraits` delegation | `com_inventorydata` |
 | Trash / Empty Trash list-view toolbar | `com_inventorydata` |
+| Checkout / check-in (edit locking): Table null support, lock icon, Check-in button, edit-view guard | `com_authenhanced` 1.3.1 (Snaffle) — **for this pattern only**; see `includes/joomla-checkout-checkin-pattern.md` |
+| List sorting from column headings only (no `fullordering` field, no `list[fullorder]` input) | `com_authenhanced` 1.3.1 (Snaffle), `forms/filter_rules.xml` and `tmpl/rules/default.php` |
 | Anything else | `includes/` — the written rule outranks any file |
 
 Flag code whose only justification is "it matches com_X" where com_X is not
@@ -184,6 +187,7 @@ All Joomla extensions must follow the **DRY (Don't Repeat Yourself) principle wi
 | **Filter applied but not in `getStoreId()`** | `ListModel` | A `filter.X` used in `getListQuery()` with no matching `$id .= ':' . $this->getState('filter.X')` line | Add the line — otherwise cached results leak across filter states |
 | **`filter_fields`/`haystack` declared in the model** | `ListModel::__construct()` | `$config['filter_fields'] = [...]`, `$this->haystack = $config['haystack'] ?? null`, or either array hard-coded on the model | Move both arrays onto the list `HtmlView` and push them in with `$model->setFilterFields()` / `$model->setHaystack()` **before** `getItems()`. They describe the template, not the model. See `includes/joomla-coding-preferences.md` → *Preferred `getListQuery()` Pattern* |
 | **Sortable heading missing from `filter_fields`** | list `HtmlView` + `tmpl` | A column passed to `searchtools.sort` in the template with no matching entry (bare **and** alias-qualified) in the View's `filter_fields` | Add both forms — `populateState()` silently drops the ordering and the heading looks sortable while doing nothing |
+| **Admin list view without the column toggle** | list `tmpl` | An administrator `tmpl/{entities}/default.php` rendering a `<table>` with no `useScript('table.columns')` | Add `$wa->useScript('table.columns')->useScript('multiselect');` and a `data-name` on the table. Core ships the dropdown on every list; a component without it is the odd one out. See *Column Visibility Toggle* below |
 
 #### **CRITICAL — Missing Inheritance (Layers Not Extending)**
 
@@ -877,6 +881,99 @@ Flag legacy plugin event patterns and verify that modernizations preserve backwa
 ### Filter Form Patterns
 - **`fullordering` field in filter XML**: Flag any `<field name="fullordering"` in `filter_*.xml` files. Column headings provide sorting via `HTMLHelper::_('searchtools.sort', ...)` — the fullordering dropdown is redundant. The `<fields name="list">` section should only contain the `limit` (limitbox) field.
 
+### Sort Dropdown Leftovers — Suggest the Cleanup (💡 SUGGESTION)
+
+Sorting belongs to the column headings. When a `fullordering` dropdown has been removed, or
+was never wired, its remnants stay behind. They are inert, but each tells the next reader that
+a second sort mechanism exists, and they get copied into new list views. Report them together
+as **one** cleanup finding per list view, not one per line.
+
+**Detection:**
+- `Grep: "fullordering"` across `forms/`. This also catches a block inside `<!-- -->`, which
+  the live-field check above ignores.
+- `Grep: "list\[fullorder(ing)?\]"` across `tmpl/`. A hidden input in the list form.
+  `list[fullorder]` is read by nothing. `list[fullordering]` duplicates the field
+  `searchtools.js` creates itself.
+- `Grep: "_FIELDSORT_|_LIST_FULL_ORDERING|_(ASCENDING|DESCENDING)(_LABEL)?\b"` across
+  `language/`. Constants only a sort dropdown uses. The language audit lists them as unused,
+  and they confirm the finding.
+- Sort `<option>`s with English typed in (`ID Ascending`) where core has the key
+  (`JGRID_HEADING_ID_ASC`, `JSTATUS_ASC`).
+
+**Fix:** delete the commented block, the hidden input and the orphaned constants together.
+Keep `$listOrder` and `$listDirn` in the template: the headings use them. Do not add a
+`list[fullordering]` input back "for safety".
+
+**Before suggesting it**, confirm every column the headings sort by is in the View's
+`filter_fields`. That list, not the dropdown, is what makes a heading sort work.
+
+Reference: `includes/joomla-coding-preferences.md` → "List Sorting — Column Headings Only".
+Canonical: `com_authenhanced` 1.3.1 (Snaffle).
+
+### Checkout / Check-in Not Releasing (⚠️ IMPORTANT)
+
+Every table with `checked_out` relies on core's edit locking. Core does the controller work,
+but three extension-side omissions leave locks that never truly release. None raises an error.
+
+**Detection — run for every table with a `checked_out` column:**
+
+| Check | How | Finding |
+|---|---|---|
+| Table declares NULL support | `Grep: "_supportNullValue"` in the entity's `src/Table/*Table.php` | ⚠️ Absent: `Table::checkIn()` writes `0` and `0000-00-00 00:00:00` instead of `NULL`. The record never returns to its original state |
+| Schema matches core | The `CREATE TABLE` in `sql/install.*.sql`, plus any later `MODIFY` | ⚠️ `checked_out` signed or `DEFAULT 0`. 💡 No `idx_checked_out` |
+| No hollow overrides | `Grep: "function save("` and `"function cancel("` in `src/Controller/*Controller.php` | ⚠️ An override that only calls `parent::save()` or `parent::cancel()` without passing `$key`/`$urlVar` or returning. Delete it |
+| Close can find the record | The edit template's `<form action=…>` | ⚠️ No `&id=` in the URL: `FormController::cancel()` reads `input->getInt('id')`, so Close skips the check-in |
+| The lock is visible | `Grep: "jgrid.checkedout"` in the list `tmpl/`, `checked_out` in `getListQuery()` | ⚠️ Absent: a stuck lock can only be found through Global Check-in |
+| It can be released | `Grep: "->checkin\("` in the list View | ⚠️ Absent |
+| Save hidden on another user's lock | `checked_out` compared to the current user in the edit View's `addToolbar()` | ⚠️ Absent: a second editor can overwrite the first |
+| Message defined | The language audit's "implied by a list task" section | ⚠️ `COM_{NAME}_N_ITEMS_CHECKED_IN` missing: the success message renders as the raw key |
+
+**How it survives:** checkout visibly works, because `checked_out` fills with the editor's id.
+Check-in also "works": it writes `0`, which Joomla treats as unlocked. The defect is only visible
+in the database, or on a server with `NO_ZERO_DATE`, where the zero date changes.
+
+**Runtime confirmation:** where a dev database is reachable, run
+`SELECT checked_out, checked_out_time … WHERE checked_out = 0 OR checked_out_time = '0000-00-00 00:00:00'`.
+Any row means check-ins have been writing the wrong values. Say so, and include the data
+conversion `UPDATE`s in the fix. Note that **Database → Fix skips `UPDATE` statements**.
+
+**Fix:** follow `includes/joomla-checkout-checkin-pattern.md`, including its review checklist.
+Canonical: `com_authenhanced` 1.3.1 (Snaffle).
+
+**As a standalone task** ("check whether these extensions have working checkout/check-in"):
+run the table above for every table with a `checked_out` column in every extension in scope,
+and report one row per table with each check marked pass or fail. That is the deliverable, not
+a narrative.
+
+### Language Constants — Missing, Unused, Malformed (⚠️ IMPORTANT / 💡 SUGGESTION)
+
+**Run the audit script on every review** rather than cross-referencing by eye. Joomla renders
+an undefined constant as its raw key, with no error. Several keys are never written in the
+extension's source: `AdminController` builds `{text_prefix}_N_ITEMS_*` itself. And a line Joomla
+silently drops (a bare key, an odd quote count) looks defined to a reader.
+
+```bash
+php "E:/repositories/ClaudeCode/skills/joomla/language-audit/language-audit.php" <extension or repo path>
+```
+
+| Script section | Severity |
+|---|---|
+| Missing — used in code, not defined | ⚠️ IMPORTANT |
+| Missing — implied by a list task | ⚠️ IMPORTANT |
+| Malformed lines | ⚠️ IMPORTANT. The key is undefined at runtime |
+| Duplicate keys | 💡 SUGGESTION |
+| Unused | 💡 SUGGESTION, after the verification in the skill's step 2 |
+| Empty values, Style, Untranslated | 💡 SUGGESTION |
+
+Quote each finding's file and line as the script gives it. Before reporting an unused key,
+apply the skill's verification step, and treat its **Keys built at runtime** section as the
+false-positive list. Where the unused keys are `_FIELDSORT_*` or `_LIST_FULL_ORDERING*`, fold
+them into the **Sort Dropdown Leftovers** finding rather than listing them twice. List a clean
+run under *Checks run and clean*.
+
+Full procedure: `skills/joomla/language-audit/SKILL.md`. The user can run it directly as
+`/language-audit`. Hand fixes involving wording or translation to `joomla-language-manager`.
+
 ### Language String Patterns
 - **`_HEADING_` in column header constants**: Flag any `COM_{NAME}_HEADING_{FIELD}` language constants. The correct convention is `COM_{NAME}_COLUMN_{FIELD}`. Joomla core strings (`JGRID_HEADING_ID`, `JSTATUS`, `JGLOBAL_TITLE`, etc.) are exempt — only custom/entity-specific column constants must use `_COLUMN_`.
 
@@ -925,6 +1022,18 @@ Flag legacy plugin event patterns and verify that modernizations preserve backwa
 - **Toolbar buttons opening modals**: When a `standardButton` should open a modal instead of submitting the form, it MUST use `->onclick('')` to suppress the default `Joomla.submitbutton()` call. Without this, the form submits and the page reloads. Use `->listCheck(true)` if the button should be disabled until list items are selected.
 - **Inline `<script>` without Web Asset Manager**: Prefer extracting JS to separate files loaded via `$wa = $this->getDocument()->getWebAssetManager()`. Inline scripts should be minimal (e.g., wiring data-attributes on toolbar buttons).
 - **Missing `form.validate` in edit views**: Any HtmlView whose template `<form>` has `class="form-validate"` MUST load the form validator via `$this->document->getWebAssetManager()->useScript('form.validate')` in `display()`. Without this, Save/Apply toolbar buttons fail with: `document.formvalidator is undefined`.
+- **Admin list view missing `table.columns`** (⚠️ IMPORTANT): Every administrator list template should load core's column-visibility dropdown. **Detection**: for each `administrator/.../tmpl/{entities}/default.php` containing `<table`, Grep the file for `table.columns`. Absent → finding. **Fix**: at the top of the template,
+  ```php
+  $wa = $this->getDocument()->getWebAssetManager();
+  $wa->useScript('table.columns')
+      ->useScript('multiselect');
+  ```
+  Exempt: `modal.php` picker layouts, and site (frontend) templates — core loads it on management screens only.
+- **`table.columns` loaded without `data-name` on the table** (⚠️ IMPORTANT): the script keys `localStorage` off `$table.dataset.name`, falling back to the text of `.page-title`. That fallback is the translated toolbar title — the user's saved columns vanish when the admin language changes, two views sharing a title share a key, and a layout that never calls `ToolbarHelper::title()` has no `.page-title` at all, so `document.querySelector('.page-title').textContent` throws and the toggle dies for every table on the page. **Detection**: a template that loads `table.columns` whose `<table` tag has no `data-name=`. **Fix**: `<table class="table" id="{entity}List" data-name="com_{name}.{entities}">`.
+- **`colspan` empty-state or footer row inside `<tbody>`** (🚨 CRITICAL where `table.columns` is loaded): `toggleColumn()` indexes `$row.children[index]` on **every** body row, so a row with fewer cells than headers throws `Cannot read properties of undefined (reading 'classList')` the first time a user hides a column — the toggle then stops working entirely. **Detection**: Grep list templates for `colspan` inside `<tbody>`, and for `JGLOBAL_NO_MATCHING_RESULTS` rendered in a `<tr>`. **Fix**: render the alert *instead of* the table (`if (empty($this->items)) : … else : <table>`), as core does; give any footer row one cell per column.
+- **Icon-only heading with no accessible label** (💡 SUGGESTION, in list views loading `table.columns`): the dropdown labels each entry from the first `<span>` in the `<th>`, then `span.visually-hidden`, then the `<th>` text. A heading holding only an icon produces a blank, unusable checkbox row. **Fix**: add `<span class="visually-hidden">…</span>` to the heading — which the screen-reader audit wants anyway.
+- **Responsive `d-*-table-cell` classes used to hide columns** (💡 SUGGESTION): `table.columns` strips `d-none` and every `d-*-table-cell` class from the headers and cells when it initialises, so breakpoint-based column hiding silently stops applying. The toggle is the supported mechanism. (The script itself only runs above 992px — a list showing no dropdown on a narrow screen is correct behaviour, not a bug to report.)
+- **Second table in a list layout gaining its own dropdown** (💡 SUGGESTION): the script matches every `table:not(.columns-order-ignore)` on the page. **Fix**: add `class="columns-order-ignore"` to any secondary/decorative table in the layout.
 
 ### Database Query Patterns
 - **`bind()` called with an expression instead of a variable**: `DatabaseQuery::bind()` takes its value **by reference** (`&$value`), so only a variable is a legal argument. Flag any `->bind(..., <expression>, ...)` where the value is a function call, cast, concatenation, or ternary — e.g. `->bind(':name', trim($name), ...)`, `->bind(':id', (int) $id, ...)`, `->bind(':x', $a . $b, ...)`. This raises PHP's **"Only variables can be passed by reference"** error (the IDE flags it too).

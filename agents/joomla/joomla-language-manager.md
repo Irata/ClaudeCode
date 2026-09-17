@@ -161,14 +161,29 @@ Search all forms/*.xml files for:
 ```
 
 ### Phase 4: Cross-Reference
+
+Run the shared audit script. Do not rebuild the cross-reference by hand:
+
+```bash
+php "E:/repositories/ClaudeCode/skills/joomla/language-audit/language-audit.php" <extension path>
 ```
-1. Collect all Text::_('CONSTANT') calls from PHP and XML files
-2. Collect all constants defined in .ini files
-3. Report:
-   - Used but undefined (missing from .ini)
-   - Defined but unused (dead constants in .ini)
-   - Inconsistent naming (doesn't follow prefix convention)
-```
+
+It reports the following, with a file and line for each:
+- keys used but undefined
+- keys **implied** by list tasks
+- malformed lines Joomla silently drops
+- duplicates, unused keys, empty values, and keys untranslated relative to en-GB
+
+Implied keys are `{text_prefix}_N_ITEMS_PUBLISHED`, `_UNPUBLISHED`, `_ARCHIVED`, `_TRASHED`,
+`_DELETED` and `_CHECKED_IN`, which `AdminController` builds itself. No extension source file
+names them, so a grep for `Text::_(` never finds them. Apply the verification in
+`skills/joomla/language-audit/SKILL.md`, step 2, before deleting anything reported as unused.
+Then add what remains:
+- Inconsistent naming (doesn't follow the prefix convention)
+- Leftover sort-dropdown constants (`_FIELDSORT_*`, `_LIST_FULL_ORDERING*`): remove them with the
+  dropdown. See "List Sorting — Column Headings Only" in `includes/joomla-coding-preferences.md`
+
+Re-run the script after Phase 5. It should exit `0`.
 
 ### Phase 5: Generate/Update Language Files
 ```
@@ -236,6 +251,8 @@ Text::script('COM_EXAMPLE_JS_CONFIRM_DELETE');
 7. **Sort constants** alphabetically within sections
 8. **No duplicate constants** within a file
 9. **System strings** (`.sys.ini`) are minimal — name, description, menu items
+10. **Every list task has its message.** A publish, unpublish, archive, trash, delete or checkin button needs `COM_{NAME}_N_ITEMS_{PAST TENSE}` plus its `_1` form. Otherwise the success message renders as the raw key
+11. **Use core strings where core has them** (`JTOOLBAR_CHECKIN`, `JGRID_HEADING_ID_ASC`, `JSTATUS_ASC`). Never copy them into the extension's file
 
 ## Change Logging Protocol
 

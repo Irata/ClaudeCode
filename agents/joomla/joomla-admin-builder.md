@@ -725,6 +725,9 @@ class HtmlView extends BaseHtmlView
             $childBar->publish('{entities}.publish')->listCheck(true);
             $childBar->unpublish('{entities}.unpublish')->listCheck(true);
             $childBar->archive('{entities}.archive')->listCheck(true);
+            // Releases records left checked out. No controller code: AdminController::checkin()
+            // calls AdminModel::checkin(). Needs COM_{NAME}_N_ITEMS_CHECKED_IN (+ _1) defined.
+            $childBar->checkin('{entities}.checkin')->listCheck(true);
             $childBar->trash('{entities}.trash')->listCheck(true);
         }
 
@@ -753,6 +756,23 @@ Delete alone is broken on delivery: nothing can reach the trashed state, so the 
 fails on every record and the failure reads as an ACL problem. Full pattern, both gating
 variants, and how to restrict Empty Trash to `core.admin`:
 `includes/joomla-trash-delete-pattern.md`.
+
+**Edit locking is core's job — wire it, don't write it.** For any table with `checked_out`,
+`FormController` checks out on edit and checks in on Save and Close. Do not override `save()` or
+`cancel()` to reach it. The builder's part is:
+- the Table's `$_supportNullValue = true`
+- `checked_out`, `checked_out_time` and a `uc.name AS editor` join in the list query
+- the `jgrid.checkedout` lock in the list template
+- the Check-in button above
+- the `$checkedOut` guard in the FormView below
+- the implied `_N_ITEMS_CHECKED_IN` language key
+
+Full pattern and verification: `includes/joomla-checkout-checkin-pattern.md`.
+
+**The list template that goes with this View loads two core scripts.** `table.columns` (the
+column-visibility dropdown) and `multiselect` are loaded in `tmpl/{entities}/default.php`, not
+here — see *Templates* below and "Column Visibility Toggle (`table.columns`)" in the coding
+preferences for the `data-name` attribute and the empty-state rule that go with them.
 
 #### FormView Reference Template
 Use this as the base for ALL administrator edit/form views:
@@ -801,12 +821,16 @@ class HtmlView extends BaseHtmlView
         $canDo   = ContentHelper::getActions('com_{name}');
         $toolbar = $this->getDocument()->getToolbar();
 
+        // Another user holds the record: FormController::edit() refused the checkout, but the
+        // form still renders. empty() rather than is_null() tolerates rows holding a legacy 0.
+        $checkedOut = !(empty($this->item->checked_out) || $this->item->checked_out == $this->getCurrentUser()->id);
+
         ToolbarHelper::title(
             Text::_('COM_{NAME}_{ENTITY}_' . ($isNew ? 'NEW' : 'EDIT')),
             'pencil-alt'
         );
 
-        if ($canDo->get('core.edit') || $canDo->get('core.create')) {
+        if (!$checkedOut && ($canDo->get('core.edit') || $canDo->get('core.create'))) {
             $toolbar->apply('{entity}.apply');
             $toolbar->save('{entity}.save');
             $toolbar->save2new('{entity}.save2new');
@@ -860,6 +884,9 @@ Place this immediately before the title link in the title `<td>`.
 - Implement `check()` for validation
 - Implement `store()` overrides for audit fields
 - Use `#[Override]` attribute on overridden methods
+- **Tables with `checked_out` MUST declare `protected $_supportNullValue = true;`.** Without it,
+  `Table::checkIn()` writes `0` and a zero date instead of `NULL`, and no record ever returns to its
+  checked-in state. See `includes/joomla-checkout-checkin-pattern.md`.
 - **Before writing any override, read the parent class method to confirm its exact signature** — parameter types, default values, and return type MUST match exactly. Joomla core often omits type declarations; adding types the parent lacks causes a PHP `Compile Error`. For example, `Table::_getAssetParentId(?Table $table = null, $id = null)` has no type on `$id` and no return type.
 - These are shared between admin and site — place in Administrator namespace
 - For per-item ACL, implement `_getAssetName()`, `_getAssetTitle()`, and `_getAssetParentId()` — matching the parent signatures exactly
@@ -869,11 +896,24 @@ Place this immediately before the title link in the title `<td>`.
 - Use Joomla form field types (text, list, editor, calendar, media, etc.)
 - Include filter and validation attributes
 - Define filter fields for list views in `filter_*.xml`
-- **Do NOT include a `fullordering` field** in `<fields name="list">` — column headings already provide sorting via `HTMLHelper::_('searchtools.sort', ...)`. Only include the `limit` (limitbox) field in the `list` fieldset.
+- **Do NOT include a `fullordering` field** in `<fields name="list">` — column headings already provide sorting via `HTMLHelper::_('searchtools.sort', ...)`. Only include the `limit` (limitbox) field in the `list` fieldset. Not even a commented-out one, and no `_FIELDSORT_*` or `_LIST_FULL_ORDERING*` language strings to go with it.
 - **`calendar` fields MUST carry `translateformat="true"`**, plus `showtime="true"` and `filter="user_utc"` for `DATETIME` columns. Without it the field ignores the site language and uses a hardcoded format. See "Date Display — Use Joomla's Format Strings" in the coding preferences.
 
 ### 8. Templates (`tmpl/`)
 - List view: Use `Joomla\CMS\Layout\LayoutHelper` for standard list layouts
+- **Column visibility toggle — every list template loads `table.columns`.** Put it beside `multiselect` at the top of `tmpl/{entities}/default.php`, give the `<table>` a literal `data-name`, and keep the "no matching results" alert **outside** the table:
+  ```php
+  /** @var \Joomla\CMS\WebAsset\WebAssetManager $wa */
+  $wa = $this->getDocument()->getWebAssetManager();
+  $wa->useScript('table.columns')
+      ->useScript('multiselect');
+  ```
+  ```php
+  <table class="table" id="{entity}List" data-name="com_{name}.{entities}">
+  ```
+  Without `data-name` the script keys its saved state off the translated `.page-title` text — and throws outright in a layout that never sets one. A `colspan` empty-state row inside `<tbody>` makes hiding a column raise `Cannot read properties of undefined`. Icon-only headings need a `<span class="visually-hidden">` label or their dropdown entry is blank. Not loaded in `modal.php`. See "Column Visibility Toggle (`table.columns`)" in the coding preferences.
+- **List sorting is the column headings alone.** Each sortable heading is `HTMLHelper::_('searchtools.sort', …)`. The list `<form>` carries only `task`, `boxchecked` and `form.token` as hidden inputs. **Never add a `list[fullorder]` or `list[fullordering]` hidden input:** `searchtools.js` creates the field itself. See "List Sorting — Column Headings Only" in the coding preferences. Reference: the Snaffle project, `com_authenhanced` 1.3.1 (`forms/filter_rules.xml`, `tmpl/rules/default.php`).
+- **Lock icon on tables with `checked_out`:** render `HTMLHelper::_('jgrid.checkedout', $i, $item->editor, $item->checked_out_time, '{entities}.', $canCheckin)` before the edit link, inside `if ($item->checked_out)`. See `includes/joomla-checkout-checkin-pattern.md`.
 - Edit view: Use `HTMLHelper::_('uitab.startTabSet')` for tabbed interfaces
 - Include CSRF tokens: `HTMLHelper::_('form.token')`
 - Use Web Asset Manager for CSS/JS loading
@@ -1076,5 +1116,8 @@ For **EVERY** build session, append to the change log at:
 
 After completing implementation:
 ```
-1. Report the summary above to the caller, stating which items are COMPLETE and which are PARTIAL
+1. Run the language audit on the extension and resolve every Missing and Malformed finding:
+   php "E:/repositories/ClaudeCode/skills/joomla/language-audit/language-audit.php" <extension path>
+   Toolbar tasks imply keys the code never names (e.g. checkin → COM_{NAME}_N_ITEMS_CHECKED_IN).
+2. Report the summary above to the caller, stating which items are COMPLETE and which are PARTIAL
 ```

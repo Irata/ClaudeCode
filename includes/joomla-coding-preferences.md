@@ -835,6 +835,13 @@ KEY idx_checked_out (checked_out),
 KEY idx_language (language)
 ```
 
+**Edit locking needs more than the two columns.** `checked_out` stays `INT UNSIGNED` and
+nullable, never `DEFAULT 0`. The Table class MUST declare `protected $_supportNullValue = true;`,
+or `Table::checkIn()` writes `0` and a zero date instead of `NULL` and no record ever returns
+to its checked-in state. The list view shows the lock (`jgrid.checkedout`) and offers a
+Check-in button, and the edit view hides Save on another user's lock. Full pattern:
+`includes/joomla-checkout-checkin-pattern.md`.
+
 #### When to Include System Fields
 
 | Table Type | System Fields Required | Examples |
@@ -929,12 +936,106 @@ KEY `idx_lft` (`lft`)
 - The `<fields name="list">` section should only contain the `limit` (limitbox) field
 - Filter dropdowns go in `<fields name="filter">`
 
+### List Sorting — Column Headings Only
+
+Sorting belongs to the column headings. Nothing else in the list participates:
+
+| Piece | Rule |
+|---|---|
+| Column headings | `HTMLHelper::_('searchtools.sort', 'COM_{NAME}_COLUMN_{FIELD}', '{column}', $listDirn, $listOrder)` |
+| `$listOrder`, `$listDirn` | Read from `$this->state` at the top of the template, for the headings only |
+| Filter XML `<fields name="list">` | `limit` alone. No `fullordering` field, not even commented out |
+| Hidden inputs in the list `<form>` | `task`, `boxchecked` and `form.token` only. **No** `list[fullorder]` or `list[fullordering]` input. `media/system/js/searchtools.js` creates `list[fullordering]` itself when the form lacks one |
+| `filter_fields` on the View | Every column a heading offers. `ListModel::populateState()` discards any ordering not listed |
+| Language | Only `COM_{NAME}_COLUMN_*` strings for the headings. No `_FIELDSORT_*`, `_LIST_FULL_ORDERING*` or `*_ASCENDING`/`*_DESCENDING` strings, which only a sort dropdown uses |
+
+**Leftovers to remove when found.** These are dead weight from a removed dropdown, and each one
+misleads the next reader:
+- a commented-out `<field name="fullordering">` block
+- a hidden `list[fullorder]` input. Nothing reads that name, so it is inert
+- `_FIELDSORT_*` and `_LIST_FULL_ORDERING*` language constants, and sort options with English
+  typed into the XML (`ID Ascending`)
+
+`/language-audit` lists the orphaned constants as unused once the block is gone.
+
+Reference implementation: the Snaffle project, `com_authenhanced` 1.3.1:
+`forms/filter_rules.xml` and `tmpl/rules/default.php`.
+
 ### Rendering the List Filter Bar (searchtools)
 - Render the search/filter toolbar with `LayoutHelper::render('joomla.searchtools.default', ['view' => $this])` — **NOT** `HTMLHelper::_('searchtools.default', ...)`.
 - There is **no** `searchtools.default` HTMLHelper method: `Joomla\CMS\HTML\Helpers\SearchTools` exposes only `form()` and `sort()`, so `HTMLHelper::_('searchtools.default', ...)` throws `500 searchtools::default not found`. This is a common miscopy — the sort links are HTMLHelper calls, but the filter bar is a layout render.
 - `LayoutHelper::render` requires `use Joomla\CMS\Layout\LayoutHelper;` in the template — omitting it fails with `Class "LayoutHelper" not found`.
 - Column-header sort links remain `HTMLHelper::_('searchtools.sort', $titleKey, $orderColumn, $listDirn, $listOrder)` — that method does exist.
 - The view must expose `filterForm`, `activeFilters`, and `state` (set from the model in `display()`); the layout reads them.
+
+### Column Visibility Toggle (`table.columns`)
+
+**Every administrator list view loads `table.columns`.** It is core's own asset
+(`media/system/js/table-columns.js`, registered since 4.2) and it puts a *"n/m Columns"*
+dropdown above the table so the user can hide the columns they do not care about. The choice
+is remembered per table in `localStorage`. Core uses it on every list in `com_content`,
+`com_banners`, `com_users` and the rest — a component without it feels unfinished beside them,
+and wide lists become unusable on a laptop screen.
+
+Load it in the **list template**, beside `multiselect`, at the top of the file:
+
+```php
+/** @var \Joomla\CMS\WebAsset\WebAssetManager $wa */
+$wa = $this->getDocument()->getWebAssetManager();
+$wa->useScript('table.columns')
+    ->useScript('multiselect');
+```
+
+- **Template, not the view.** Unlike `form.validate` (which belongs in the FormView's
+  `display()`), core loads this pair in the `tmpl` file because the asset describes the markup
+  in that one layout. Follow core.
+- **Nothing else is required** — no language strings to add. The asset class
+  (`TableColumnsAssetItem`) pushes `JGLOBAL_COLUMNS` into `Text::script()` when it attaches.
+
+**Give the table a `data-name`:**
+
+```php
+<table class="table" id="{entity}List" data-name="com_{name}.{entities}">
+```
+
+The script keys its `localStorage` entry `joomla-tablecolumns-{name}`, taking `{name}` from
+`data-name` and falling back to the text of `.page-title`. That fallback is the *translated*
+toolbar title, so the saved state is lost whenever the admin language changes, and two views
+sharing a title share a key. Worse, a layout that never calls `ToolbarHelper::title()` has no
+`.page-title` at all — `document.querySelector('.page-title').textContent` then throws, and the
+toggle dies for **every** table on the page. A literal `data-name` removes all three failures.
+
+**What the script will and will not touch:**
+
+| Behaviour | Consequence for the template |
+|---|---|
+| Runs only when `window.innerWidth > 992` | Nothing appears on a narrow screen. Not a bug — do not "fix" it |
+| Matches **every** `table` on the page except `.columns-order-ignore` | A second table in the same layout gets its own dropdown. Add `class="columns-order-ignore"` to any table that should not have one |
+| Column 0 and any `<th>` in the **first body row** are protected | Their checkboxes render disabled. The checkbox column and a row-header cell can never be hidden |
+| Strips `d-none d-*-table-cell` from every header and cell | Responsive column hiding stops applying once the toggle is active. Use the toggle for it, not breakpoint classes |
+| Reads the heading label from the **first `<span>`** inside the `<th>` | `searchtools.sort` emits `<span>{title}</span>` first, so sortable headings label themselves |
+| Falls back to `span.visually-hidden`, then the `<th>` text | An **icon-only heading needs a `<span class="visually-hidden">` label** or its dropdown entry is blank |
+| Toggles cell `index` of every `<tbody>` row | A row with fewer cells than headers throws `Cannot read properties of undefined`. See below |
+
+**The empty state goes outside the table.** `toggleColumn()` indexes `$row.children[index]`
+on every body row, so a "no matching results" row with a `colspan` is a live TypeError the
+moment a user hides a column. Core's list templates render the alert *instead of* the table:
+
+```php
+<?php if (empty($this->items)) : ?>
+    <div class="alert alert-info">
+        <span class="icon-info-circle" aria-hidden="true"></span><span class="visually-hidden"><?php echo Text::_('INFO'); ?></span>
+        <?php echo Text::_('JGLOBAL_NO_MATCHING_RESULTS'); ?>
+    </div>
+<?php else : ?>
+    <table class="table" id="{entity}List" data-name="com_{name}.{entities}">
+```
+
+The same applies to any footer or summary row: it must carry one cell per column, or it must
+live outside the table.
+
+**Not for modal layouts.** `tmpl/{entities}/modal.php` picks records; it is not a management
+screen and core does not load the asset there.
 
 ### Date Display — Use Joomla's Format Strings
 

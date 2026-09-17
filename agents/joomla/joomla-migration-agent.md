@@ -88,6 +88,7 @@ Verify all changes compile and follow Joomla 5 conventions.
 | Pattern | Detection Regex | Migration |
 |---|---|---|
 | Missing `form.validate` in edit views | `class="form-validate"` in template without `useScript('form.validate')` in view | Add `$this->document->getWebAssetManager()->useScript('form.validate')` to `display()` |
+| Missing `table.columns` in admin list views | Admin `tmpl/{entities}/default.php` with a `<table` but no `useScript('table.columns')` | Add `$wa->useScript('table.columns')->useScript('multiselect');` plus `data-name` on the table, and move any `colspan` empty-state row outside the table |
 | No `SubscriberInterface` in plugins | Plugin files without `SubscriberInterface` | Add `SubscriberInterface` + `getSubscribedEvents()` |
 | Missing service provider | No `services/provider.php` | Create modern DI service provider |
 | Static helper calls | `\bHelper::` static calls | Use HelperFactory pattern |

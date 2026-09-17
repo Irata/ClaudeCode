@@ -14,4 +14,5 @@
 
 | Skill | Description | Example |
 |-------|-------------|---------|
+| `/language-audit` | Audit a Joomla extension's language constants — missing, unused, malformed, duplicated and untranslated — including the messages Joomla builds implicitly from $text_prefix | `/language-audit [path] [--lang=en-GB] [--prefix=COM_EXAMPLE]` |
 | `/version-bump` | Bump the V.R.M version across manifest XML, Phing build file, and SQL update file for any Joomla extension project | `/version-bump modification` |
