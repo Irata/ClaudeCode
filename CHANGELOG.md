@@ -14,6 +14,8 @@ History before 2026-09-16 is in the git log.
 
 ## [Unreleased]
 
+## [2026-09-17]
+
 ### Added
 
 - **This changelog**, recording what changes in the repository and why. `/ship`
@@ -129,5 +131,6 @@ rebuilds the code reviewer around checks drawn from those defects.
 - **`joomla-less-builder` is now under version control.** It was gitignored, so it
   was the one agent a clone of this repository did not receive.
 
-[Unreleased]: https://github.com/Irata/ClaudeCode/compare/bdaa322...HEAD
+[Unreleased]: https://github.com/Irata/ClaudeCode/compare/17858d3...HEAD
+[2026-09-17]: https://github.com/Irata/ClaudeCode/compare/bdaa322...17858d3
 [2026-09-16]: https://github.com/Irata/ClaudeCode/compare/d2e1750...bdaa322
