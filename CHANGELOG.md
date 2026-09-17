@@ -14,17 +14,6 @@ History before 2026-09-16 is in the git log.
 
 ## [Unreleased]
 
-### Changed
-
-- **The debugger's Xdebug instructions come from a live session.** Testing them
-  against a paused session confirmed the session tools work with source kept outside
-  the PhpStorm project directory, and added three rules: take the `sessionId` from
-  the status call, ask before stepping or resuming — `RESUME` lets the request
-  finish and loses the paused state — and never copy cookie or session values from
-  a frame's `$_COOKIE`, `$_SESSION`, `$_SERVER` or `$_POST` into a report. Stepping
-  was verified too; a step returns the new position and the frame's values in one
-  call.
-
 ## [2026-09-17]
 
 ### Added
@@ -44,6 +33,17 @@ History before 2026-09-16 is in the git log.
   is call-hierarchy analysis, which does not resolve PHP symbols. When the project
   is not open in PhpStorm, both agents fall back to Grep and the `mysql` client, and
   the reviewer reports the IDE checks as not run rather than clean.
+
+### Changed
+
+- **The debugger's Xdebug instructions come from a live session.** Testing them
+  against a paused session confirmed the session tools work with source kept outside
+  the PhpStorm project directory, and added three rules: take the `sessionId` from
+  the status call, ask before stepping or resuming — `RESUME` lets the request
+  finish and loses the paused state — and never copy cookie or session values from
+  a frame's `$_COOKIE`, `$_SESSION`, `$_SERVER` or `$_POST` into a report. Stepping
+  was verified too; a step returns the new position and the frame's values in one
+  call.
 
 ### Fixed
 
@@ -170,6 +170,6 @@ rebuilds the code reviewer around checks drawn from those defects.
 - **`joomla-less-builder` is now under version control.** It was gitignored, so it
   was the one agent a clone of this repository did not receive.
 
-[Unreleased]: https://github.com/Irata/ClaudeCode/compare/adbddda...HEAD
-[2026-09-17]: https://github.com/Irata/ClaudeCode/compare/bdaa322...adbddda
+[Unreleased]: https://github.com/Irata/ClaudeCode/compare/747c251...HEAD
+[2026-09-17]: https://github.com/Irata/ClaudeCode/compare/bdaa322...747c251
 [2026-09-16]: https://github.com/Irata/ClaudeCode/compare/d2e1750...bdaa322
