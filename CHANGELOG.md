@@ -14,6 +14,15 @@ History before 2026-09-16 is in the git log.
 
 ## [Unreleased]
 
+## [2026-09-17]
+
+### Added
+
+- **This changelog**, recording what changes in the repository and why. `/ship`
+  now writes an entry with each change it commits and releases the entries as a
+  dated section when it pushes, and `CLAUDE.md` sets out how entries are written
+  for changes committed any other way.
+
 ### Fixed
 
 - **MCP servers are documented as needing registration.** `includes/.mcp.json` is
@@ -30,15 +39,6 @@ History before 2026-09-16 is in the git log.
   needs Administrator rights. It now covers junction-based linking and the
   migration script, which scripts still need elevation, the `/ship` skill, the new
   template and includes, how agents hand work to each other, and how to update.
-
-## [2026-09-17]
-
-### Added
-
-- **This changelog**, recording what changes in the repository and why. `/ship`
-  now writes an entry with each change it commits and releases the entries as a
-  dated section when it pushes, and `CLAUDE.md` sets out how entries are written
-  for changes committed any other way.
 
 ## [2026-09-16]
 
@@ -149,6 +149,6 @@ rebuilds the code reviewer around checks drawn from those defects.
 - **`joomla-less-builder` is now under version control.** It was gitignored, so it
   was the one agent a clone of this repository did not receive.
 
-[Unreleased]: https://github.com/Irata/ClaudeCode/compare/17858d3...HEAD
-[2026-09-17]: https://github.com/Irata/ClaudeCode/compare/bdaa322...17858d3
+[Unreleased]: https://github.com/Irata/ClaudeCode/compare/fde99a6...HEAD
+[2026-09-17]: https://github.com/Irata/ClaudeCode/compare/bdaa322...fde99a6
 [2026-09-16]: https://github.com/Irata/ClaudeCode/compare/d2e1750...bdaa322
