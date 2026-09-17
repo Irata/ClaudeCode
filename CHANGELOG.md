@@ -14,8 +14,14 @@ History before 2026-09-16 is in the git log.
 
 ## [Unreleased]
 
+## [2026-09-17]
+
 ### Added
 
+- **This changelog**, recording what changes in the repository and why. `/ship`
+  now writes an entry with each change it commits and releases the entries as a
+  dated section when it pushes, and `CLAUDE.md` sets out how entries are written
+  for changes committed any other way.
 - **The code reviewer and debugger can use PhpStorm's index.** The reviewer gets
   symbol and structural search and the database schema tools: to confirm where a
   method is really declared, match code by shape rather than text, and compare a
@@ -28,15 +34,6 @@ History before 2026-09-16 is in the git log.
   is not open in PhpStorm, both agents fall back to Grep and the `mysql` client, and
   the reviewer reports the IDE checks as not run rather than clean.
 
-## [2026-09-17]
-
-### Added
-
-- **This changelog**, recording what changes in the repository and why. `/ship`
-  now writes an entry with each change it commits and releases the entries as a
-  dated section when it pushes, and `CLAUDE.md` sets out how entries are written
-  for changes committed any other way.
-
 ### Fixed
 
 - **MCP servers are documented as needing registration.** `includes/.mcp.json` is
@@ -44,9 +41,8 @@ History before 2026-09-16 is in the git log.
   project root — so no server defined there, including the five removed on
   2026-09-16, has ever loaded in a project. That, rather than disuse, is why none
   was ever called. The README's new "MCP Servers" section and
-  `includes/joomla-devel-environment.md` give the registration commands — with the
-  Git Bash path-conversion trap that silently breaks the Context7 command — and
-  note that the agents list Context7's tools but not PhpStorm's.
+  `includes/joomla-devel-environment.md` give the registration commands, including
+  the Git Bash path-conversion trap that silently breaks the Context7 command.
   **Action required:** register Context7 and phpstorm once per machine to use them.
 - **README brought up to date with the 2026-09-16 changes.** It still described
   per-file symlinks with a confirmation prompt for each file, and said every script
@@ -163,6 +159,6 @@ rebuilds the code reviewer around checks drawn from those defects.
 - **`joomla-less-builder` is now under version control.** It was gitignored, so it
   was the one agent a clone of this repository did not receive.
 
-[Unreleased]: https://github.com/Irata/ClaudeCode/compare/fde99a6...HEAD
-[2026-09-17]: https://github.com/Irata/ClaudeCode/compare/bdaa322...fde99a6
+[Unreleased]: https://github.com/Irata/ClaudeCode/compare/adbddda...HEAD
+[2026-09-17]: https://github.com/Irata/ClaudeCode/compare/bdaa322...adbddda
 [2026-09-16]: https://github.com/Irata/ClaudeCode/compare/d2e1750...bdaa322
