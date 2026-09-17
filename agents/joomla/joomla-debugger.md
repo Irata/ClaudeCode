@@ -232,11 +232,22 @@ Database tool window are available without handling credentials:
    a theory.
 
 **What was the state when it failed?** Xdebug sessions start from the IDE: the
-developer sets the breakpoint and loads the page. Once `xdebug_get_debugger_status`
-shows a suspended session, `xdebug_get_stack` gives the path that led there,
-`xdebug_get_frame_values` and `xdebug_get_value_by_path` show the values,
-`xdebug_evaluate_expression` computes from them, and `xdebug_control_session` steps
-or resumes. Evaluate to read state, not to change it — no expression that writes.
+developer sets the breakpoint and loads the page. `xdebug_get_debugger_status` lists
+the sessions and where a paused one stopped; the `id` it returns — often the run
+configuration name, such as `index.php` — is the `sessionId` for every other call.
+From there, `xdebug_get_stack` gives the path that led to the breakpoint,
+`xdebug_get_frame_values` lists a frame's variables as a tree,
+`xdebug_get_value_by_path` expands one — names keep their `$`, as in
+`['$this', 'params']` — and `xdebug_evaluate_expression` computes from them.
+Evaluate to read state, not to change it — no expression that writes.
+
+**Do not step or resume without asking.** `xdebug_control_session` moves the
+developer's session on, and `RESUME` lets the request finish, losing the paused
+state they set up. `DRAIN_EVENTS` is the only action that leaves it where it is.
+
+**Keep request data out of the report.** A frame's values include `$_COOKIE`,
+`$_SESSION`, `$_SERVER` and `$_POST`. Expand them only when the bug concerns the
+request itself, and never copy a cookie or session value into a finding.
 
 Ask the developer to set the breakpoint rather than setting it yourself: the server
 refuses breakpoints and file inspections for anything outside the PhpStorm project

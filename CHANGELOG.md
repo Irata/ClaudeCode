@@ -14,6 +14,15 @@ History before 2026-09-16 is in the git log.
 
 ## [Unreleased]
 
+### Changed
+
+- **The debugger's Xdebug instructions come from a live session.** Testing them
+  against a paused session confirmed the session tools work with source kept outside
+  the PhpStorm project directory, and added three rules: take the `sessionId` from
+  the status call, ask before stepping or resuming — `RESUME` lets the request
+  finish and loses the paused state — and never copy cookie or session values from
+  a frame's `$_COOKIE`, `$_SESSION`, `$_SERVER` or `$_POST` into a report.
+
 ## [2026-09-17]
 
 ### Added

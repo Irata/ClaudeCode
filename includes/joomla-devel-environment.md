@@ -101,9 +101,15 @@ Every tool also needs `projectPath` set to the PhpStorm project directory, with 
 project open in the IDE; otherwise it answers with the list of open projects. For
 MySQL and MariaDB, `databaseName` is `""` and the database is the `schemaName`.
 
-The code reviewer and debugger are granted the working tools. The Xdebug stack,
-frame and evaluation tools act on a session the developer starts from the IDE, and
-were not exercised when this was tested because that needs a live session.
+The code reviewer and debugger are granted the working tools.
+
+The Xdebug session tools — `xdebug_get_stack`, `xdebug_get_frame_values`,
+`xdebug_get_value_by_path`, `xdebug_evaluate_expression` and
+`xdebug_control_session` — were verified against a live session paused in a plugin
+under `E:\repositories`. They act on a session rather than a file path, so the
+project layout does not affect them. The `id` returned by
+`xdebug_get_debugger_status` is the `sessionId`, and frame values come back as a
+text tree whose variable names keep their `$`.
 
 **The port is assigned by the IDE and is not guaranteed stable across upgrades.**
 If the server stops answering, rediscover it rather than guessing — find the
