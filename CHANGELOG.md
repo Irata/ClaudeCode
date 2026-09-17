@@ -14,6 +14,20 @@ History before 2026-09-16 is in the git log.
 
 ## [Unreleased]
 
+### Added
+
+- **The code reviewer and debugger can use PhpStorm's index.** The reviewer gets
+  symbol and structural search and the database schema tools: to confirm where a
+  method is really declared, match code by shape rather than text, and compare a
+  live table with `sql/install.*.sql`. The debugger gets those, plus read-only
+  queries and Xdebug session inspection. Each tool was tested against these
+  projects' layout before being granted. PhpStorm refuses any file outside the
+  PhpStorm project directory, and these projects keep all their source outside it,
+  so file inspections, symbol lookup by position and breakpoints are left out — as
+  is call-hierarchy analysis, which does not resolve PHP symbols. When the project
+  is not open in PhpStorm, both agents fall back to Grep and the `mysql` client, and
+  the reviewer reports the IDE checks as not run rather than clean.
+
 ## [2026-09-17]
 
 ### Added

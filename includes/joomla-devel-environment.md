@@ -80,9 +80,30 @@ which makes it available in every project:
 claude mcp add --scope user --transport http phpstorm http://127.0.0.1:<port>/stream
 ```
 
-Confirm it from a project directory with `claude mcp list`. Its tools reach the
-main session only — the Joomla agents do not list them, so agents cannot call
-them.
+Confirm it from a project directory with `claude mcp list`.
+
+**What works with this project layout.** A PhpStorm project directory
+(`E:\PHPStorm Project Files\<name>`) holds no source — the repository is attached
+as content roots from `E:\repositories`. Tested against that layout:
+
+- **Works:** `search_symbol` and `search_structural` across every content root;
+  the database tools (`list_database_connections`, `list_database_schemas`,
+  `introspect_schema`, `list_schema_objects`, `get_database_object_description`,
+  `preview_table_data`, `execute_sql_query`); Xdebug session state
+  (`xdebug_get_debugger_status`, `xdebug_list_breakpoints`).
+- **Refused:** every tool that takes a `filePath` — `get_file_problems`,
+  `get_inspections`, `get_symbol_info`, `xdebug_set_breakpoint`,
+  `xdebug_run_to_line` — because the file is outside the project directory, whether
+  the path is given relative or absolute.
+- **Does not resolve PHP:** `analyze_calls` rejects every form of PHP symbol name.
+
+Every tool also needs `projectPath` set to the PhpStorm project directory, with that
+project open in the IDE; otherwise it answers with the list of open projects. For
+MySQL and MariaDB, `databaseName` is `""` and the database is the `schemaName`.
+
+The code reviewer and debugger are granted the working tools. The Xdebug stack,
+frame and evaluation tools act on a session the developer starts from the IDE, and
+were not exercised when this was tested because that needs a live session.
 
 **The port is assigned by the IDE and is not guaranteed stable across upgrades.**
 If the server stops answering, rediscover it rather than guessing — find the

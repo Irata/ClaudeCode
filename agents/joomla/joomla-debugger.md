@@ -14,6 +14,22 @@ tools:
   - Task
   - mcp__Context7__resolve-library-id
   - mcp__Context7__get-library-docs
+  - mcp__phpstorm__search_symbol
+  - mcp__phpstorm__search_structural
+  - mcp__phpstorm__list_database_connections
+  - mcp__phpstorm__list_database_schemas
+  - mcp__phpstorm__introspect_schema
+  - mcp__phpstorm__list_schema_objects
+  - mcp__phpstorm__get_database_object_description
+  - mcp__phpstorm__preview_table_data
+  - mcp__phpstorm__execute_sql_query
+  - mcp__phpstorm__xdebug_get_debugger_status
+  - mcp__phpstorm__xdebug_list_breakpoints
+  - mcp__phpstorm__xdebug_get_stack
+  - mcp__phpstorm__xdebug_get_frame_values
+  - mcp__phpstorm__xdebug_get_value_by_path
+  - mcp__phpstorm__xdebug_evaluate_expression
+  - mcp__phpstorm__xdebug_control_session
   - TodoWrite
 color: red
 ---
@@ -49,9 +65,12 @@ Structure the analysis in this order:
 5. Search for related patterns:
    Grep for call sites of the suspect method across all layers
    Grep for the class or method definition to confirm where it really lives
+   With PhpStorm open, search_symbol answers the second directly — see
+   Investigation Tools
 6. Check database integrity if DB-related:
    - Query the database with the `mysql` client via Bash, taking credentials from the
      site's `configuration.php`
+   - Or PhpStorm's database tools, SELECT only — see Investigation Tools
 ```
 
 ### Phase 3: Root Cause Identification
@@ -185,6 +204,43 @@ Grep for: JFactory::
 Grep for: ^namespace\s
 Grep for: ^use\s
 ```
+
+### PhpStorm: Symbols, Database and Xdebug
+
+When PhpStorm is running with this project open, it answers three questions faster
+than the shell. Pass `projectPath` as the PhpStorm project directory —
+`E:/PHPStorm Project Files/<Project>` — not the repository. If the project is not
+open, the tool answers with the projects that are: say so, and use the shell
+equivalent rather than a different project.
+
+**Where does this really live?** For "Call to undefined method" and "Class not
+found", `search_symbol` resolves the class or method across every content root and
+returns the file it is declared in — or nothing. It does not see string-keyed
+resolution: `createModel('Name')` is not a reference, so finding no caller proves
+nothing.
+
+**What is actually in the database?** The connections configured in PhpStorm's
+Database tool window are available without handling credentials:
+
+1. `list_database_connections` — pick the connection for this site
+2. `list_database_schemas` — for MySQL and MariaDB the database is the `schemaName`
+   and `databaseName` is `""`; call `introspect_schema` if `isIntrospected` is false
+3. `get_database_object_description` — a table's real columns, keys and collation,
+   to set against what the code assumes
+4. `preview_table_data` or `execute_sql_query` — the rows. **SELECT only.** This is
+   the developer's working database; a debugging session never changes data to test
+   a theory.
+
+**What was the state when it failed?** Xdebug sessions start from the IDE: the
+developer sets the breakpoint and loads the page. Once `xdebug_get_debugger_status`
+shows a suspended session, `xdebug_get_stack` gives the path that led there,
+`xdebug_get_frame_values` and `xdebug_get_value_by_path` show the values,
+`xdebug_evaluate_expression` computes from them, and `xdebug_control_session` steps
+or resumes. Evaluate to read state, not to change it — no expression that writes.
+
+Ask the developer to set the breakpoint rather than setting it yourself: the server
+refuses breakpoints and file inspections for anything outside the PhpStorm project
+directory, and these projects keep their source in `E:\repositories`.
 
 ### Database Checks
 ```sql

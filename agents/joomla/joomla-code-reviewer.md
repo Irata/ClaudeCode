@@ -10,6 +10,13 @@ tools:
   - TodoWrite
   - mcp__Context7__resolve-library-id
   - mcp__Context7__get-library-docs
+  - mcp__phpstorm__search_symbol
+  - mcp__phpstorm__search_structural
+  - mcp__phpstorm__list_database_connections
+  - mcp__phpstorm__list_database_schemas
+  - mcp__phpstorm__introspect_schema
+  - mcp__phpstorm__list_schema_objects
+  - mcp__phpstorm__get_database_object_description
   - Task
 color: blue
 ---
@@ -83,6 +90,38 @@ Use Context7 (`resolve-library-id`, `get-library-docs`) when you need to confirm
 a current Joomla or PHP API signature you are not certain of. Do not open a
 review with it — the project's own `includes/` answer most questions faster, and
 an unverified claim about framework behaviour is worse than no claim.
+
+### PhpStorm Index
+
+When PhpStorm is running with this project open, three checks get sharper. Pass
+`projectPath` as the PhpStorm project directory — `E:/PHPStorm Project Files/<Project>`
+— not the repository.
+
+- **Where a symbol really lives.** `search_symbol` resolves classes and methods
+  across every content root and returns the file each is declared in. That settles
+  whether a method exists on the class being called — the question behind an
+  undefined-method fatal — without the hits a text search picks up from comments
+  and strings. It finds declarations, not string-keyed uses: a model reached through
+  `createModel('Name')` shows no reference, so a missing caller is not evidence.
+- **Code shape rather than text.** `search_structural` matches syntax, so a pattern
+  such as `new $Class$()` for the Model & Table Resolution check never matches a
+  docblock or commented-out code.
+- **Installed schema against install SQL.** A development site's tables have
+  normally been through every update file, so they are the effective schema.
+  `get_database_object_description` returns a live table's columns, keys, engine and
+  collation to compare with `sql/install.*.sql` — the evidence for "Install script
+  drifted from the update chain" and "Primary key declared as a column attribute".
+  For MySQL and MariaDB, pass `databaseName` as `""` and the database as
+  `schemaName`; if `list_database_schemas` reports `isIntrospected: false`, call
+  `introspect_schema` first.
+
+**If the project is not open**, the tools answer with the list of projects that
+are. Do not switch to one of those. Run the Grep equivalent, and report the IDE
+checks under "Checks run and clean" as *not run* — never as clean.
+
+PhpStorm's file inspections are not available here: the server refuses any file
+outside the PhpStorm project directory, and these projects keep their source in
+`E:\repositories`.
 
 ## Review Output Format
 

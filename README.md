@@ -185,7 +185,7 @@ Run these from Command Prompt or PowerShell. In Git Bash, prefix the Context7 co
 
 Keep the name `Context7` exactly as written: MCP tool names are built from the server name, and the agents are granted Context7's tools by those names.
 
-The `phpstorm` server runs inside the IDE, so PhpStorm must be open with its MCP server enabled. `<port>` is whichever port PhpStorm assigned on your machine; `includes/joomla-devel-environment.md` shows how to find it. Its tools are available to the main Claude Code session — the Joomla agents do not currently list them, so agents cannot call them.
+The `phpstorm` server runs inside the IDE, so PhpStorm must be open with its MCP server enabled. `<port>` is whichever port PhpStorm assigned on your machine; `includes/joomla-devel-environment.md` shows how to find it. The code reviewer and debugger can use part of it — symbol and structural search and the database tools, plus Xdebug session inspection for the debugger — when the project is open in PhpStorm. File inspections, breakpoints and call hierarchy are left out: the server refuses files outside the PhpStorm project directory, which is where these projects keep their source, and its call hierarchy does not resolve PHP symbols.
 
 Run `claude mcp list` from a project directory to confirm what that project can see.
 
