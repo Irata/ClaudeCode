@@ -244,6 +244,9 @@ Evaluate to read state, not to change it — no expression that writes.
 **Do not step or resume without asking.** `xdebug_control_session` moves the
 developer's session on, and `RESUME` lets the request finish, losing the paused
 state they set up. `DRAIN_EVENTS` is the only action that leaves it where it is.
+Once agreed, a `STEP_OVER`, `STEP_INTO` or `STEP_OUT` returns the new position and
+the frame's values in one response, so there is no need to re-query status and
+stack after each step — and the same request data rule applies to those values.
 
 **Keep request data out of the report.** A frame's values include `$_COOKIE`,
 `$_SESSION`, `$_SERVER` and `$_POST`. Expand them only when the bug concerns the

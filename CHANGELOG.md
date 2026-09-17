@@ -21,7 +21,9 @@ History before 2026-09-16 is in the git log.
   the PhpStorm project directory, and added three rules: take the `sessionId` from
   the status call, ask before stepping or resuming — `RESUME` lets the request
   finish and loses the paused state — and never copy cookie or session values from
-  a frame's `$_COOKIE`, `$_SESSION`, `$_SERVER` or `$_POST` into a report.
+  a frame's `$_COOKIE`, `$_SESSION`, `$_SERVER` or `$_POST` into a report. Stepping
+  was verified too; a step returns the new position and the frame's values in one
+  call.
 
 ## [2026-09-17]
 
