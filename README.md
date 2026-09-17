@@ -181,6 +181,8 @@ claude mcp add --scope user Context7 -- cmd /c npx -y @upstash/context7-mcp
 claude mcp add --scope user --transport http phpstorm http://127.0.0.1:<port>/stream
 ```
 
+Run these from Command Prompt or PowerShell. In Git Bash, prefix the Context7 command with `MSYS_NO_PATHCONV=1` — otherwise Git Bash rewrites `/c` as a Windows path and registers a command that never starts the server. The first `claude mcp list` afterwards may report Context7 as timed out while `npx` downloads the package; check again once it has finished.
+
 Keep the name `Context7` exactly as written: MCP tool names are built from the server name, and the agents are granted Context7's tools by those names.
 
 The `phpstorm` server runs inside the IDE, so PhpStorm must be open with its MCP server enabled. `<port>` is whichever port PhpStorm assigned on your machine; `includes/joomla-devel-environment.md` shows how to find it. Its tools are available to the main Claude Code session — the Joomla agents do not currently list them, so agents cannot call them.

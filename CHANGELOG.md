@@ -21,8 +21,9 @@ History before 2026-09-16 is in the git log.
   project root — so no server defined there, including the five removed on
   2026-09-16, has ever loaded in a project. That, rather than disuse, is why none
   was ever called. The README's new "MCP Servers" section and
-  `includes/joomla-devel-environment.md` give the registration commands, and note
-  that the agents list Context7's tools but not PhpStorm's.
+  `includes/joomla-devel-environment.md` give the registration commands — with the
+  Git Bash path-conversion trap that silently breaks the Context7 command — and
+  note that the agents list Context7's tools but not PhpStorm's.
   **Action required:** register Context7 and phpstorm once per machine to use them.
 - **README brought up to date with the 2026-09-16 changes.** It still described
   per-file symlinks with a confirmation prompt for each file, and said every script
