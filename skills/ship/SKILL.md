@@ -135,6 +135,14 @@ this — the first prints only subjects, the second is clean either way once the
 commit exists. If a stray file landed, stop and report it before committing
 anything else: it is far cheaper to fix before the next commit builds on top.
 
+**Changelog.** If the repository root has a `CHANGELOG.md`, every commit that
+changes what ships carries its own entry under `## [Unreleased]`, **in the same
+commit** — never a catch-up commit afterwards, which is where entries get
+forgotten or reconstructed from memory. Follow the file's conventions and the
+repository's `CLAUDE.md`. An entry says what changed for someone using the
+repository and why; it is not the commit subject restated. Internal-only changes
+with no effect on what ships need no entry.
+
 ### 5. Merge to main
 
 ```bash
@@ -163,6 +171,18 @@ Skip on `--keep-branch`, and skip if the work was done on `main`.
 
 ### 7. Push
 
+**Release the changelog first**, when the repository keeps a `CHANGELOG.md` and
+`[Unreleased]` has entries:
+
+1. Rename `## [Unreleased]` to `## [YYYY-MM-DD]` for today, and open a fresh,
+   empty `## [Unreleased]` above it. If today's section already exists from an
+   earlier ship, move the entries into it instead of creating a second one.
+2. Update the link references at the foot of the file: the release compares the
+   previous release's last commit with the last commit this release contains, and
+   `[Unreleased]` compares that commit with `HEAD`.
+3. Commit that change on its own, following the repository's commit convention,
+   and check it with `--stat` like any other commit.
+
 ```bash
 git push origin main
 ```
@@ -175,8 +195,9 @@ push that happened.
 ### 8. Report
 
 State what was committed — each scope, its subject line, and the file count from
-the `--stat` check — plus whether the branch was merged and removed, and the
-pushed range as confirmed from the push output. If anything was skipped or left
+the `--stat` check — plus whether the branch was merged and removed, the
+changelog section released, and the pushed range as confirmed from the push
+output. If anything was skipped or left
 behind — untracked files not staged, a version bump that should happen, an
 unmapped path — say so explicitly.
 

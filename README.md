@@ -2,6 +2,8 @@
 
 A collection of specialised agents, reference includes, skills, and project templates designed to streamline Joomla extension development with [Claude Code](https://claude.ai/code). These files are maintained in a single repository and symlinked into individual PHPStorm project directories, ensuring consistent conventions and tooling across all Joomla projects.
 
+See [CHANGELOG.md](CHANGELOG.md) for what has changed and why.
+
 ## Repository Structure
 
 ```

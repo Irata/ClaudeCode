@@ -130,8 +130,9 @@ extensions it calls into. Then:
 ```
 
 **Start at level 0 and stay there until it is clean.** Level 0 is not a warm-up —
-it is where `Call to an undefined method` lives, which is the defect that produced
-`InventoryModel::withEntity()` as a customer-visible fatal. Raising the level
+it is where `Call to an undefined method` lives — the defect behind an
+`InventoryModel::withEntity()` fatal that was only found by loading the page in a
+browser. Raising the level
 before level 0 is clean buries fatal errors under style findings.
 
 **`scanDirectories` is what makes cross-extension analysis work.** The extensions
