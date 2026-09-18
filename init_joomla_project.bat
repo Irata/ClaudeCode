@@ -96,7 +96,14 @@ if "!DB_CONN!"=="" (
 REM --- Define paths ---
 set PROJECT_DIR=%PROJECTS_DIR%\%PROJECT_NAME%
 set CLAUDE_DIR=%PROJECT_DIR%\.claude
-set TEMPLATE=%CLAUDECODE_DIR%\templates\CLAUDE.md.joomla-template
+REM A project bound to one repository gets the full template. A project holding
+REM several gets the thin one: what is mounted, and nothing about any extension.
+REM Each repository then carries its own CLAUDE.md, from CLAUDE.md.extension-template.
+if "!MULTI_REPO!"=="1" (
+    set "TEMPLATE=%CLAUDECODE_DIR%\templates\CLAUDE.md.project-template"
+) else (
+    set "TEMPLATE=%CLAUDECODE_DIR%\templates\CLAUDE.md.joomla-template"
+)
 set AGENTS_SCRIPT=%CLAUDECODE_DIR%\agents\create_agent_symlinks.bat
 set INCLUDES_SCRIPT=%CLAUDECODE_DIR%\includes\create_include_symlinks.bat
 set SKILLS_SCRIPT=%CLAUDECODE_DIR%\skills\create_skill_symlinks.bat
@@ -148,7 +155,11 @@ if not exist "%CLAUDE_DIR%" (
 
 REM --- Step 2: Create CLAUDE.md from template ---
 echo.
-echo [2/10] Generating CLAUDE.md from template...
+if "!MULTI_REPO!"=="1" (
+    echo [2/10] Generating the thin project CLAUDE.md from template...
+) else (
+    echo [2/10] Generating CLAUDE.md from template...
+)
 
 if not exist "%TEMPLATE%" (
     echo Error: Template not found at %TEMPLATE%
@@ -494,16 +505,21 @@ if "!MULTI_REPO!"=="1" (
     echo   1. Junction each repository into the project directory, where REPO is
     echo      the repository folder name:
     echo        mklink /J "%PROJECT_DIR%\REPO" "%REPOS_DIR%\REPO"
-    echo   2. Open project in PHPStorm. Keep the project directory as the only
+    echo   2. Give each repository its own CLAUDE.md, then fill in its placeholders:
+    echo        copy "%CLAUDECODE_DIR%\templates\CLAUDE.md.extension-template" "%REPOS_DIR%\REPO\CLAUDE.md"
+    echo   3. Link the shared config into each repository, so Claude Code works when
+    echo      started there too. It adds the .gitignore entries first:
+    echo        powershell -File "%CLAUDECODE_DIR%\scripts\Link-ClaudeShared.ps1" -Kind all -Path %REPOS_DIR%\REPO
+    echo   4. Open project in PHPStorm. Keep the project directory as the only
     echo      content root - a repository added as a content root as well would be
     echo      indexed twice.
-    echo   3. Settings, PHP: set the language level and select an interpreter.
+    echo   5. Settings, PHP: set the language level and select an interpreter.
     echo      Settings, PHP, Include paths: add %JOOMLA_DIR%\!DOMAIN!
-    echo   4. Settings, Version Control: confirm a git root per repository
-    echo   5. Run symlink.bat from each repository to link it into Joomla
-    echo   6. Close the project, then write the Xdebug path mappings:
+    echo   6. Settings, Version Control: confirm a git root per repository
+    echo   7. Run symlink.bat from each repository to link it into Joomla
+    echo   8. Close the project, then write the Xdebug path mappings:
     echo        powershell -File "%CLAUDECODE_DIR%\scripts\Set-PhpStormJunctionMappings.ps1" -Project %PROJECT_NAME% -Instance !DOMAIN!
-    echo   7. Start Claude Code in the project directory
+    echo   9. Start Claude Code in the project directory
 ) else (
     echo   Next steps:
     echo   1. Open project in PHPStorm

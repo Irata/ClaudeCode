@@ -68,6 +68,12 @@ History before 2026-09-16 is in the git log.
 
 ### Changed
 
+- **A multi-repository project is generated from the thin template.**
+  `init_joomla_project.bat` writes `CLAUDE.md.project-template` when the repository
+  prompt is left empty, and its closing summary now includes giving each repository
+  its own `CLAUDE.md` from `CLAUDE.md.extension-template` and linking the shared
+  config into it. A project bound to one repository still gets the full
+  `CLAUDE.md.joomla-template`, unchanged.
 - **`init_joomla_project.bat` can create a project for more than one repository.**
   The repository prompt now chooses the layout: name a repository and the project
   is bound to it exactly as before, receiving `symlink.bat` and the Phing
