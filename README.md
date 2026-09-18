@@ -45,7 +45,6 @@ ClaudeCode/
 ├── config.bat.example
 ├── config.bat              (gitignored — your local paths)
 ├── init_joomla_project.bat
-├── init_joomla_frontend.bat
 ├── symlink.bat
 └── README.md
 ```
@@ -136,7 +135,7 @@ Templates provide starting points for new projects and extensions. They contain 
 | Template                                        | Purpose                                                                                                                                        |
 |-------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
 | **CLAUDE.md.joomla-template**                   | Main project CLAUDE.md template — includes project configuration, namespace conventions, agent orchestration workflow, and all `@includes/` references |
-| **CLAUDE.md.joomla-frontend-template**          | Front-end/template design project CLAUDE.md — CSS architecture, template overrides, accessibility, and performance budgets                     |
+| **CLAUDE.md.joomla-frontend-template**          | Front-end/template design project CLAUDE.md — CSS architecture, template overrides, accessibility, and performance budgets. Copy it by hand; no init script generates it |
 | **Phing/**                                      | Build XML templates copied into extension repositories for packaging and deployment                                                            |
 | **phpstan.neon.dist**                           | PHPStan configuration for an extension repository — copy to `phpstan.neon` and set the extension, Joomla instance, and sibling extensions      |
 | **project-ecosystem.accountdata-template.md**   | Data model template for accounting/financial extensions                                                                                        |
@@ -191,7 +190,7 @@ Run `claude mcp list` from a project directory to confirm what that project can 
 
 ## Batch Files
 
-`init_joomla_project.bat`, `init_joomla_frontend.bat`, and `symlink.bat` require **Administrator privileges** and will self-elevate if not already running as admin. The three link scripts under `agents/`, `includes/`, and `skills/` do not — they create directory junctions, which need no elevation.
+`init_joomla_project.bat` and `symlink.bat` require **Administrator privileges** and will self-elevate if not already running as admin. The three link scripts under `agents/`, `includes/`, and `skills/` do not — they create directory junctions, which need no elevation.
 
 ### `init_joomla_project.bat`
 
@@ -216,18 +215,6 @@ The main project initialisation script for **Joomla extension development**. Run
 - Repository folder name — **the answer chooses the layout**. Name a repository and the project is bound to that one, as before: it receives `symlink.bat` and the Phing templates. Press Enter instead for a project holding more than one repository, each junctioned into the project directory afterwards; steps 7 and 8 are skipped and the closing summary explains what to do next
 - Joomla domain / folder name (defaults to project name)
 - Database connection name (defaults to `<project>_dev`)
-
-### `init_joomla_frontend.bat`
-
-Project initialisation for **Joomla template/front-end design** projects. Similar structure to `init_joomla_project.bat` but tailored for template development.
-
-**Prompts for:**
-- PHPStorm project name and Joomla template name
-- Repository folder name and Joomla domain
-- CSS framework choice (Bootstrap 5, Tailwind CSS, or Custom)
-- Build tool choice (None, Vite, or Webpack)
-
-**Creates:** project directory, CLAUDE.md, style-guide and design-decisions stubs, skill and include links, and optionally scaffolds a full Joomla template directory with `templateDetails.xml`, `index.php`, `joomla.asset.json`, language files, and asset stubs.
 
 ### `symlink.bat`
 
@@ -329,7 +316,7 @@ Supporting documentation for the agent ecosystem and multi-extension architectur
 
 1. Clone this repository
 2. Copy `config.bat.example` to `config.bat` and edit the paths to match your environment
-3. Run `init_joomla_project.bat` (extension development) or `init_joomla_frontend.bat` (template design)
+3. Run `init_joomla_project.bat`
 4. Follow the prompts — the script creates the project directory, generates CLAUDE.md, and links agents, includes, and skills
 5. Register the MCP servers once per machine — see [MCP Servers](#mcp-servers)
 6. Open the project in PHPStorm

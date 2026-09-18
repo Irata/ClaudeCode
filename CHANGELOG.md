@@ -28,6 +28,13 @@ History before 2026-09-16 is in the git log.
   for a project whose repositories are junctioned into the project directory,
   deriving them from the links in the Joomla instance rather than a hand-kept list.
 
+### Removed
+
+- **`init_joomla_frontend.bat`.** The front-end project initialiser is gone, and
+  the README no longer offers it as an alternative to `init_joomla_project.bat`.
+  `templates/CLAUDE.md.joomla-frontend-template` stays — copy it by hand for a
+  template-design project.
+
 ### Changed
 
 - **`init_joomla_project.bat` can create a project for more than one repository.**
