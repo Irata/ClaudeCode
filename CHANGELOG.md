@@ -28,6 +28,21 @@ History before 2026-09-16 is in the git log.
   for a project whose repositories are junctioned into the project directory,
   deriving them from the links in the Joomla instance rather than a hand-kept list.
 
+- **`templates/CLAUDE.md.project-template` and `templates/CLAUDE.md.extension-template`**
+  — a `CLAUDE.md` split for projects holding several repositories. The project file
+  is thin: what is mounted, and the rules that only exist at project level — one
+  content root, a git root per repository, a cross-repository change being two
+  commits. Everything about an extension moves into a `CLAUDE.md` at the root of
+  its own repository, which travels with the code and loads both when Claude Code
+  runs in that repository and when it is mounted in a shared project.
+  `CLAUDE.md.joomla-template` is unchanged and still right for one repository per
+  project.
+- **`Link-ClaudeShared.ps1 -Path`** links the shared agents, includes and skills
+  into any directory, typically an extension repository, so Claude Code works when
+  started there. Junctions inside a git working tree are a trap — git walks into
+  them and offers the whole shared repository for commit — so when the target is a
+  repository the script adds `/.claude/` and `/includes/` to its `.gitignore`
+  before creating them, replacing the warning it used to print.
 - **`templates/joomla-canonical-references.md.example`** — a starting point for
   `includes/joomla-canonical-references.md`, which records the extension holding the
   reference implementation of each pattern. That file is gitignored: its entries

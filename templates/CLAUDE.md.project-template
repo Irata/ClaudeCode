@@ -1,0 +1,48 @@
+# {{PROJECT_NAME}}
+
+<!--
+  A shared project: a mount point for several repositories, nothing more. Keep it
+  thin. Anything about a particular extension - paths, database, namespaces,
+  dependencies, build - belongs in that repository's own CLAUDE.md, which loads
+  when Claude reads files there and travels with the code. Anything true of every
+  repository belongs in the shared includes.
+
+  If you find yourself adding project configuration here, ask which repository it
+  actually describes.
+-->
+
+This project holds several repositories, each junctioned into the project
+directory and each carrying its own `CLAUDE.md`:
+
+```
+E:\PHPStorm Project Files\{{PROJECT_NAME}}\
+├── _repo-one_\    ->  E:\repositories\_repo-one_
+├── _repo-two_\    ->  E:\repositories\_repo-two_
+└── _repo-three_\  ->  E:\repositories\_repo-three_
+```
+
+Replace those with the repositories actually mounted here. A repository's own
+`CLAUDE.md` is the authority on it; this file only records what is mounted.
+
+## Working Across Repositories
+
+- **The project directory is the only content root.** Each repository is reached
+  through its junction and nowhere else. A repository added as a content root as
+  well would be indexed twice, and every class would resolve to two files.
+- **Each repository is a separate git root.** A change spanning two of them is two
+  commits in two repositories, never one. `/ship` operates on one repository —
+  tell it which, or run it in that repository.
+- **Cross-repository calls are the reason for mounting them together.** One index
+  means a consumer's call into a data layer resolves. It also means an edit in one
+  repository can break another without either being open — check the consumers
+  before changing a shared service signature.
+
+## Shared Standards
+
+The coding standards, structure references and agent instructions are the same for
+every repository here. They are linked into each repository rather than duplicated,
+so a repository opened on its own carries them too.
+
+@includes/available-agents.md
+
+@includes/available-skills.md

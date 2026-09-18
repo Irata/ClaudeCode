@@ -25,7 +25,18 @@
     Which set to link: includes, agents, skills, or all.
 
 .PARAMETER Project
-    PHPStorm project name. Prompted for when omitted.
+    PHPStorm project name, resolved under PROJECTS_DIR. Prompted for when omitted
+    and -Path was not given.
+
+.PARAMETER Path
+    Link into this directory instead of a PHPStorm project - an extension
+    repository, so that Claude Code works when started there rather than only in a
+    project the repository is mounted in.
+
+    A junction inside a git working tree is a trap: git walks into it and offers to
+    commit the whole shared repository. So for a repository the script adds the
+    ignore entries the junctions need before creating them, and reports what it
+    added.
 
 .PARAMETER DryRun
     Report what would change without touching the filesystem.
@@ -47,6 +58,8 @@ param(
     [string] $Kind,
 
     [string] $Project,
+
+    [string] $Path,
 
     [switch] $DryRun
 )
@@ -180,9 +193,17 @@ function Remove-LinkOnlyDirectory {
 # --- The one operation this script performs --------------------------------
 
 function Set-Junction {
-    param([string] $Link, [string] $Target, [string] $Label)
+    param([string] $Link, [string] $Target, [string] $Label, [switch] $TargetCreatedEarlier)
 
     if (-not (Test-Path -LiteralPath $Target)) {
+        # In a dry run a link this one chains off has not been created, so its
+        # target is legitimately absent. Reporting that as a failure would make a
+        # clean dry run exit non-zero.
+        if ($DryRun -and $TargetCreatedEarlier) {
+            Write-Status "  + $Label" 'Green'
+            $script:Created++
+            return
+        }
         Write-Status "  ! $Label -- shared target missing: $Target" 'Red'
         $script:Skipped++
         return
@@ -239,7 +260,7 @@ function Invoke-Includes {
 
     # CLAUDE.md refers to shared files as @includes/..., which resolves relative to
     # CLAUDE.md at the project root, so the root needs to reach them too.
-    Set-Junction -Link "$ProjectDir\includes" -Target "$ProjectDir\.claude\includes" -Label 'includes (project root)'
+    Set-Junction -Link "$ProjectDir\includes" -Target "$ProjectDir\.claude\includes" -Label 'includes (project root)' -TargetCreatedEarlier
 }
 
 function Invoke-Agents {
@@ -297,6 +318,43 @@ function Invoke-Skills {
     }
 }
 
+# Adds the entries the junctions need to a repository's .gitignore, leaving any
+# that are already there alone. Returns $false only when the file could not be
+# written, so the caller can fall back to asking.
+function Set-GitIgnoreEntries {
+    param([string] $Root, [string[]] $Entries)
+
+    $file = Join-Path $Root '.gitignore'
+    $existing = @()
+    if (Test-Path -LiteralPath $file) {
+        $existing = @(Get-Content -LiteralPath $file | ForEach-Object { $_.Trim() })
+    }
+
+    $missing = @($Entries | Where-Object { $existing -notcontains $_ })
+    if ($missing.Count -eq 0) {
+        Write-Status "  .gitignore already ignores the shared junctions" 'DarkGray'
+        return $true
+    }
+
+    if ($DryRun) {
+        Write-Status "  would add to .gitignore: $($missing -join ', ')" 'Cyan'
+        return $true
+    }
+
+    try {
+        $lines = @()
+        if ($existing.Count -gt 0 -and $existing[-1] -ne '') { $lines += '' }
+        $lines += '# Shared Claude Code configuration, junctioned from the ClaudeCode repository'
+        $lines += $missing
+        Add-Content -LiteralPath $file -Value $lines -Encoding UTF8
+        Write-Status "  .gitignore: added $($missing -join ', ')" 'Green'
+        return $true
+    }
+    catch {
+        return $false
+    }
+}
+
 # --- Entry point -----------------------------------------------------------
 
 $sharedDir = Split-Path -Parent $PSScriptRoot
@@ -317,32 +375,51 @@ if (-not $projectsDir) {
     exit 1
 }
 
-if (-not $Project) { $Project = Read-Host 'Enter PHPStorm project name' }
-if (-not $Project) {
-    Write-Status "Error: project name cannot be empty." 'Red'
+if ($Path -and $Project) {
+    Write-Status "Error: pass -Project or -Path, not both." 'Red'
     exit 1
 }
 
-$projectDir = Join-Path $projectsDir $Project
-if (-not (Test-Path -LiteralPath $projectDir)) {
-    Write-Status "Error: project directory does not exist: $projectDir" 'Red'
-    exit 1
+if ($Path) {
+    if (-not (Test-Path -LiteralPath $Path)) {
+        Write-Status "Error: directory does not exist: $Path" 'Red'
+        exit 1
+    }
+    $projectDir = (Get-Item -LiteralPath $Path).FullName
+}
+else {
+    if (-not $Project) { $Project = Read-Host 'Enter PHPStorm project name' }
+    if (-not $Project) {
+        Write-Status "Error: project name cannot be empty." 'Red'
+        exit 1
+    }
+
+    $projectDir = Join-Path $projectsDir $Project
+    if (-not (Test-Path -LiteralPath $projectDir)) {
+        Write-Status "Error: project directory does not exist: $projectDir" 'Red'
+        exit 1
+    }
 }
 
 # A junction inside a git working tree is a trap: git walks into it and offers to
-# commit the whole shared repository. These scripts target PHPStorm project folders,
-# which are not repositories, so this should never fire -- but the cost of being
-# wrong is high enough to be worth the check.
+# commit the whole shared repository. Linking into a repository is deliberate now --
+# it is what lets Claude Code work when started there rather than only in a project
+# the repository is mounted in -- so close the trap instead of warning about it, by
+# ignoring the junctions before they exist.
 if (Test-Path -LiteralPath (Join-Path $projectDir '.git')) {
-    Write-Status "Warning: $projectDir is a git working tree." 'Yellow'
-    Write-Status "Junctions inside a repository get walked into by git and the shared" 'Yellow'
-    Write-Status "repo's contents can end up staged for commit." 'Yellow'
-    $answer = Read-Host 'Continue anyway? (y/N)'
-    if ($answer -notmatch '^(y|yes)$') { Write-Status 'Aborted.' 'Red'; exit 1 }
+    Write-Status "Target is a git working tree - ignoring the junctions first." 'White'
+    if (-not (Set-GitIgnoreEntries -Root $projectDir -Entries @('/.claude/', '/includes/'))) {
+        Write-Status "Could not write .gitignore in $projectDir." 'Red'
+        Write-Status "Without those entries git walks into the junctions and offers the" 'Yellow'
+        Write-Status "whole shared repository for commit." 'Yellow'
+        $answer = Read-Host 'Continue anyway? (y/N)'
+        if ($answer -notmatch '^(y|yes)$') { Write-Status 'Aborted.' 'Red'; exit 1 }
+    }
 }
 
 Write-Host ''
-Write-Status "Project : $projectDir" 'White'
+if ($Path) { Write-Status "Repo    : $projectDir" 'White' }
+else { Write-Status "Project : $projectDir" 'White' }
 Write-Status "Shared  : $sharedDir" 'White'
 if ($DryRun) { Write-Status "Mode    : DRY RUN, nothing will be changed" 'Magenta' }
 Write-Host ''

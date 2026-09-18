@@ -1,0 +1,375 @@
+# {{REPO_NAME}} - Joomla Extension Repository
+
+<!--
+  This file lives at the root of the extension repository, so it travels with the
+  code. It loads in two situations, and is written to work in both:
+
+    * Claude Code started in this repository  - it is the project CLAUDE.md
+    * The repository mounted by junction in a shared project - it loads when
+      Claude reads files in this repository, alongside that project's thin
+      CLAUDE.md
+
+  Everything here describes THIS repository. Anything true of every repository
+  belongs in the shared includes rather than in a copy of this file.
+-->
+
+## Repository Configuration
+
+- **Repository**: {{REPO_NAME}}
+- **Extension Type**: {{EXTENSION_TYPE}} (Component/Module/Plugin)
+- **Vendor Namespace**: {{VENDOR_NAMESPACE}} (e.g., Acme, Emporium)
+- **PHP Version**: 8.5+ (typed properties, constructor promotion, readonly, enums, `#[Override]`)
+- **Joomla Version**: 5.2+ (Joomla Framework 2.0+)
+- **Status**: {{PROJECT_STATUS}} (Active/Maintenance/Archived)
+
+## Directory Paths
+
+- **Repository**: `E:\repositories\{{REPO_NAME}}`
+- **Joomla Instance**: `E:\www\{{DOMAIN}}`
+- **Build Output**: `E:\Extensions\install_files\`
+- **Phing Configuration**: `E:\repositories\{{REPO_NAME}}\build.xml`
+- **Work Log**: `E:\repositories\{{REPO_NAME}}\Files\work-log.md`
+
+When this repository is mounted in a shared project it appears at
+`E:\PHPStorm Project Files\{{PROJECT_NAME}}\{{REPO_NAME}}`, junctioned to the path
+above. The two are the same files; PhpStorm and Xdebug know them by the junction
+path, git and Phing by the repository path.
+
+## Database
+
+- **Connection Name**: {{DB_CONNECTION_NAME}}
+- **Database Name**: {{DATABASE_NAME}}
+- **Database Type**: MariaDB 10.5+ / MySQL 8.0+
+- **Table Prefix**: `#__`
+
+## Service Layer Architecture
+
+This extension follows the **Service Layer Pattern** to separate business logic from controllers:
+
+- **Administrator\Service\** — Canonical implementations of all business logic
+- **Services registered** in `services/provider.php` via Dependency Injection (DI)
+- **Controllers delegate** to services (business logic never duplicated across Site/API/CLI)
+- **All layers reuse** Administrator services unchanged
+- **Data access** through Repository interfaces (never raw database queries in business logic)
+
+**Benefits**:
+- Single source of truth for business logic
+- Easy to test (inject mock repositories)
+- Easy to reuse across contexts (Admin UI, Site UI, REST API, CLI)
+- Loose coupling between components
+
+See: `E:\repositories\ClaudeCode\docs\agent-usage-guide.md` — "Service Layer Architecture Pattern" section
+
+## Namespace Conventions
+
+All extensions in this project use the vendor namespace `{{VENDOR_NAMESPACE}}`:
+
+- **Components**: `{{VENDOR_NAMESPACE}}\Component\{{COMPONENT_NAME}}\`
+  - `{{VENDOR_NAMESPACE}}\Component\{{COMPONENT_NAME}}\Administrator\` — Backend/admin code
+  - `{{VENDOR_NAMESPACE}}\Component\{{COMPONENT_NAME}}\Site\` — Frontend/public code
+  - `{{VENDOR_NAMESPACE}}\Component\{{COMPONENT_NAME}}\Api\` — REST API endpoints
+  - `{{VENDOR_NAMESPACE}}\Component\{{COMPONENT_NAME}}\Cli\` — CLI console commands
+
+- **Modules**: `{{VENDOR_NAMESPACE}}\Module\{{MODULE_NAME}}\`
+  - Site modules and admin helper modules
+
+- **Plugins**: `{{VENDOR_NAMESPACE}}\Plugin\{{PLUGIN_GROUP}}\{{PLUGIN_NAME}}\`
+  - Plugins across all groups (content, system, user, webservices, etc.)
+
+## Coding Standards
+
+@includes/joomla-coding-preferences.md
+
+## Canonical References
+
+Which extension holds the reference implementation of a pattern, so that "it
+matches com_X" can be checked rather than assumed. Create this file from
+`templates/joomla-canonical-references.md.example` — it is gitignored, because its
+entries name your own projects. Remove the line below if you do not keep one.
+
+@includes/joomla-canonical-references.md
+
+## Development Environment
+
+@includes/joomla-devel-environment.md
+
+## Extension Structure References
+
+### Component
+@includes/joomla-structure-component.md
+
+### API
+@includes/joomla-structure-api.md
+
+### Plugin
+@includes/joomla-structure-plugin.md
+
+@includes/joomla-self-documenting-plugin.md
+
+### Module
+@includes/joomla-structure-module.md
+
+### CLI
+@includes/joomla-structure-cli.md
+
+## Architecture References
+
+@includes/joomla-di-patterns.md
+
+@includes/joomla-events-system.md
+
+## Deprecated Patterns (AVOID)
+
+@includes/joomla-depreciated.md
+
+## Inter-Project Dependencies
+
+### Data Layer Extensions (if this is a domain extension)
+
+This extension may depend on reusable data layer extensions:
+
+| Extension | Purpose | Reference |
+|-----------|---------|-----------|
+| **com_inventorydata** | Inventory management & stock control | Inject `Emporium\InventoryData\Repository\ItemRepository` |
+| **com_entitydata** | Customer, supplier, business data | Inject `Emporium\EntityData\Repository\CustomerRepository` |
+| **com_accountdata** | Financial data (orders, invoices, payments) | Inject `Emporium\AccountData\Repository\OrderRepository` |
+
+**Important**: Never create circular dependencies. Data layers should not depend on domain extensions.
+
+**Reference Documentation**:
+- Inter-project integration patterns: `E:\repositories\ClaudeCode\docs\INTERPROJECT-REFERENCES.md`
+- Ecosystem overview: `E:\repositories\ClaudeCode\docs\PROJECT-ECOSYSTEM.md`
+
+### Services This Extension Provides
+
+Document in `.claude/project-ecosystem.md`:
+- List all services and repositories this extension provides
+- List which events this extension emits
+- List which other extensions depend on this one
+
+### Services This Extension Consumes
+
+Document in `.claude/project-ecosystem.md`:
+- List all injected services and repositories
+- List which events this extension listens to
+- List which other extensions this depends on
+
+## Context7 Libraries
+
+For enhanced development context, the following libraries are available in Context7:
+
+@includes/context7.json
+
+Additional libraries:
+- **PHPUnit** — Testing framework (`/sebastianbergmann/phpunit`)
+- **Symfony Console** — CLI command framework (`/symfony/console`)
+
+## Agent Orchestration
+
+### Standard Development Workflow
+
+1. **Requirements** (optional) → `joomla-prd-writer`
+   - Use for complex requirements or new features
+   - Produces Product Requirements Document
+
+2. **Architecture** → `joomla-architect`
+   - Designs extension structure, namespace map, DI wiring, database schema
+   - Writes decisions to `docs/architecture/`
+   - **Always run this before building**
+
+3. **Implementation** (Parallel) → Choose builders based on extension type:
+   - **Component Admin**: `joomla-admin-builder` (controllers, models, services, forms, ACL)
+   - **Component Site**: `joomla-site-builder` (frontend controller, router, templates)
+   - **REST API**: `joomla-api-builder` (API controller, JSON views, webservices plugin)
+   - **CLI Commands**: `joomla-cli-builder` (console commands, Symfony Console integration)
+   - **Modules**: `joomla-module-builder` (dispatcher pattern, helper factory)
+   - **Plugins**: `joomla-plugin-builder` (event subscriber, dispatcher)
+
+4. **Language/i18n** → `joomla-language-manager`
+   - Audit all hardcoded strings
+   - Ensure complete `Text::_()` coverage
+   - Manage translation files
+
+5. **Quality Assurance** (Parallel):
+   - **Code Review**: `joomla-code-reviewer` — PHP 8.3+, Joomla standards, patterns
+   - **Security**: `joomla-security-auditor` — SQL injection, XSS, CSRF, ACL, file upload
+   - **Performance**: `joomla-performance-agent` — N+1 queries, caching, asset loading
+
+6. **Testing** → `joomla-test-engineer`
+   - PHPUnit tests for all services
+   - Integration tests for controllers
+   - Coverage targets and fixtures
+
+7. **Debugging** (on-demand) → `joomla-debugger`
+   - Systematic bug diagnosis
+   - Root cause analysis via logs and pattern search
+   - Minimal targeted fixes
+
+### Orchestrator vs Direct Agent Usage
+
+**Use `joomla-orchestrator`** when:
+- Building a complete extension from scratch
+- You want agents coordinated automatically
+- Complex multi-phase workflows
+
+**Use direct agents** when:
+- Working on a specific component (just the Site layer, just a module, just tests)
+- You know exactly which agent you need
+- Faster for focused, well-defined tasks
+
+### Agent Context Sharing
+
+Per-task context travels in the Task prompt the orchestrator writes when it
+delegates. Anything that must outlive the task is a document in the repository
+under `docs/architecture/` — see the conventions below.
+
+### Available Agents
+
+@includes/available-agents.md
+
+## Skills (Shared)
+
+Skills are junctioned from `E:\repositories\ClaudeCode\skills\` into `.claude\skills\` — of this repository, so they are available when Claude Code runs here, and of any shared project this repository is mounted in. They are project-agnostic.
+
+@includes/available-skills.md
+
+## Architecture Document Conventions
+
+Written by the architect, read by the builders. One file per topic, per extension.
+
+### Requirements
+- `docs/PRD-{ext}.md` — Product requirements
+
+### Architecture (per extension)
+- `docs/architecture/{ext}-namespace-map.md`
+- `docs/architecture/{ext}-di-wiring.md`
+- `docs/architecture/{ext}-db-schema.md`
+- `docs/architecture/{ext}-class-hierarchy.md`
+- `docs/architecture/{ext}-event-flow.md`
+- `docs/architecture/{ext}-acl-matrix.md`
+- `docs/architecture/{ext}-routing.md`
+- `docs/architecture/{ext}-api-design.md`
+
+### Quality Reports (per extension)
+- `docs/security-{ext}-audit-report.md`
+- `docs/performance-{ext}-report.md`
+
+Builders and reviewers report their status to the orchestrator in their reply
+rather than writing a status file.
+
+## Quick Start Checklist
+
+- [ ] Clone repository to `E:\repositories\{{REPO_NAME}}`
+- [ ] Link the shared agents, includes and skills into this repository, so Claude Code
+      works when started here. The script adds the `.gitignore` entries the junctions
+      need before it creates them:
+      `powershell -File E:\repositories\ClaudeCode\scripts\Link-ClaudeShared.ps1 -Kind all -Path E:\repositories\{{REPO_NAME}}`
+- [ ] Mount the repository in a shared PhpStorm project, if it is one of several:
+      `mklink /J "E:\PHPStorm Project Files\{{PROJECT_NAME}}\{{REPO_NAME}}" "E:\repositories\{{REPO_NAME}}"`
+- [ ] Create `.claude/project-ecosystem.md` documenting services this extension provides/consumes
+- [ ] Configure database connection `{{DB_CONNECTION_NAME}}` in Joomla
+- [ ] Set up Joomla development instance at `E:\www\{{DOMAIN}}`
+- [ ] Review `includes/joomla-coding-preferences.md` for code standards
+- [ ] Review `includes/joomla-di-patterns.md` for DI patterns
+- [ ] Invoke `joomla-architect` to design the extension
+- [ ] Invoke appropriate builder agent(s) for implementation
+- [ ] Run `vendor/bin/phpunit` to execute tests
+- [ ] Invoke `joomla-code-reviewer` for quality check
+
+## Common Development Tasks
+
+### Starting a New Extension
+
+```
+1. Create this CLAUDE.md from the template
+2. Update {{placeholders}} with project-specific values
+3. Run agent symlink scripts
+4. Invoke: joomla-architect "Design new {{EXTENSION_TYPE}}"
+5. Invoke: appropriate builder agent for implementation
+```
+
+### Adding a Feature to Existing Extension
+
+```
+1. Describe feature requirements
+2. Invoke: joomla-architect "Design new feature: [description]"
+3. Invoke: builder agent(s) for implementation
+4. Invoke: joomla-code-reviewer "Review [feature name] implementation"
+```
+
+### Adding a New Service
+
+```
+1. Create file: src/Administrator/Service/{{ServiceName}}.php
+2. Register in services/provider.php
+3. Or invoke: joomla-admin-builder "Add new service: {{ServiceName}}"
+```
+
+### Creating Tests
+
+```
+1. Invoke: joomla-test-engineer "Create tests for {{ServiceName}}"
+2. Run: vendor/bin/phpunit
+3. Check coverage: vendor/bin/phpunit --coverage-html build/coverage
+```
+
+### Debugging an Issue
+
+```
+1. Check Joomla error log: E:\www\{{DOMAIN}}/error.log
+2. Enable debug: set DEBUG=1 in .env
+3. Invoke: joomla-debugger "Diagnose issue: [description]"
+```
+
+### Building a Release Package
+
+```
+1. Update version in manifest.xml
+2. Update SQL schemas for migrations
+3. Invoke: joomla-build-agent "Build release package for v1.0.0"
+4. Package created at: E:\repositories\{{REPO_NAME}}\build\
+```
+
+### Migrating from Joomla 4
+
+```
+1. Invoke: joomla-migration-agent "Migrate com_{{PROJECT_NAME}} from J4 to J5"
+2. Review generated migration report
+3. Apply automated fixes
+4. Manual review for complex changes
+```
+
+## Documentation References
+
+**Project-Specific** (in this project):
+- `.claude/project-ecosystem.md` — Services/events/dependencies
+- `.claude/architecture.md` — Architecture decisions
+
+**Shared References** (in ClaudeCode repository):
+- `E:\repositories\ClaudeCode\docs\agent-usage-guide.md` — Comprehensive agent guide
+- `E:\repositories\ClaudeCode\docs\PROJECT-ECOSYSTEM.md` — Multi-extension ecosystem
+- `E:\repositories\ClaudeCode\docs\INTERPROJECT-REFERENCES.md` — Inter-project patterns
+- `E:\repositories\ClaudeCode\includes\joomla-coding-preferences.md` — Code standards
+- `E:\repositories\ClaudeCode\includes\joomla-di-patterns.md` — DI patterns
+- `E:\repositories\ClaudeCode\includes\joomla-events-system.md` — Events system
+- `E:\repositories\ClaudeCode\includes\joomla-depreciated.md` — Avoid these patterns
+- `E:\repositories\ClaudeCode\includes\joomla-devel-environment.md` — Dev environment setup
+
+**Official Documentation**:
+- [Joomla 5.x Docs](https://docs.joomla.org/)
+- [Joomla Framework](https://framework.joomla.org/)
+- [Web Services API](https://docs.joomla.org/Selecting_a_webservice_version)
+- [Symfony Console](https://symfony.com/doc/current/components/console.html)
+- [PHPUnit Documentation](https://phpunit.de/documentation.html)
+
+## Change Logging
+
+All agent activities are logged to: `E:\PROJECTS\LOGS\`
+Each agent maintains its own log file named `joomla-{agent-role}.md`.
+
+---
+
+**Project Created**: {{CREATION_DATE}}
+**Maintained By**: {{MAINTAINER_NAME}}
+**Last Updated**: {{LAST_UPDATED}}
+**Status**: {{PROJECT_STATUS}}

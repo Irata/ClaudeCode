@@ -247,7 +247,10 @@ powershell -File scripts\Link-ClaudeShared.ps1 -Kind all -Project <name>
 
 - **`-Kind`** — `includes`, `agents`, `skills`, or `all`
 - **`-Project`** — the PHPStorm project name; prompted for when omitted
+- **`-Path`** — link into this directory instead, typically an extension repository, so Claude Code works when started there and not only in a project the repository is mounted in
 - **`-DryRun`** — report what would change without touching the filesystem
+
+Linking into a repository would otherwise set a trap: git walks into the junctions and offers the whole shared repository for commit. When the target is a git working tree the script adds `/.claude/` and `/includes/` to its `.gitignore` before creating anything, and says what it added.
 
 `.claude\agents` and `.claude\includes` each become a single junction over the matching folder here. Skills are junctioned one at a time, because Claude Code only discovers skills at the top level of `.claude\skills` while this repository nests some by category. Links to skills that have been removed from this repository are pruned; a real directory in `.claude\skills` is a project-local skill and is left alone.
 
