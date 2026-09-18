@@ -28,6 +28,16 @@ History before 2026-09-16 is in the git log.
   for a project whose repositories are junctioned into the project directory,
   deriving them from the links in the Joomla instance rather than a hand-kept list.
 
+- **`templates/joomla-canonical-references.md.example`** — a starting point for
+  `includes/joomla-canonical-references.md`, which records the extension holding the
+  reference implementation of each pattern. That file is gitignored: its entries
+  name your own projects. The reviewer and builders now point at it rather than
+  naming extensions themselves, so the rule ships and the pointers stay local.
+  **Action required** to keep the Canonical Reference Rule working: copy the
+  example to `includes/joomla-canonical-references.md` and fill it in. Without it
+  the rule still holds — `includes/` is then the reference — but no extension is
+  named as canonical for anything.
+
 ### Fixed
 
 - **Local project, repository and site names replaced with placeholders** in

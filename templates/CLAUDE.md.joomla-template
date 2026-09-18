@@ -63,6 +63,15 @@ All extensions in this project use the vendor namespace `{{VENDOR_NAMESPACE}}`:
 
 @includes/joomla-coding-preferences.md
 
+## Canonical References
+
+Which extension holds the reference implementation of a pattern, so that "it
+matches com_X" can be checked rather than assumed. Create this file from
+`templates/joomla-canonical-references.md.example` — it is gitignored, because its
+entries name your own projects. Remove the line below if you do not keep one.
+
+@includes/joomla-canonical-references.md
+
 ## Development Environment
 
 @includes/joomla-devel-environment.md

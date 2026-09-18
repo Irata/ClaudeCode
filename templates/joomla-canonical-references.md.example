@@ -1,0 +1,42 @@
+## Canonical References
+
+Which extension holds the reference implementation of a pattern. The reviewer and
+the builders consult this before accepting that code "matches com_X" — an older
+extension carrying a rejected pattern is how one defect becomes many.
+
+Copy this file to `includes/joomla-canonical-references.md` and fill it in for your
+own extensions. That path is gitignored: the entries name real projects and
+sometimes real paths, which belong to your machine rather than to this repository.
+
+An entry earns its place when an agent would otherwise have to guess. If two
+extensions implement a pattern and one is better, say which. If the written
+standard in `includes/` already settles it, no entry is needed.
+
+Keep each reference specific enough to open — the extension, its version, and the
+files that matter.
+
+### Component and List View
+
+| Pattern | Canonical reference |
+|---|---|
+| `getListQuery()`, filters, shared list-query traits | `com_example` |
+| Trash / Empty Trash list-view toolbar | `com_example` |
+| List sorting from column headings only | `com_example` 1.0.0, `forms/filter_items.xml` and `tmpl/items/default.php` |
+
+### Editing and Locking
+
+| Pattern | Canonical reference |
+|---|---|
+| Checkout / check-in: Table null support, lock icon, Check-in button, edit-view guard | `com_example` 1.0.0 — for this pattern only |
+
+### Data Access and Services
+
+| Pattern | Canonical reference |
+|---|---|
+| Service to DataModel to Table pipeline | `com_example` |
+| Single point of authorisation | `com_example`, `Administrator\Service\AuthorisationService` |
+
+### Anything Else
+
+`includes/` — the written rule outranks any file. Where no entry exists here, the
+standards are the reference, not whichever extension happens to be open.

@@ -54,16 +54,13 @@ the code in front of you is a hypothesis — say so, or drop it.
 at different maturity levels, and the older ones carry patterns that have since
 been rejected. Copying from them is how one defect becomes thirteen.
 
-When code under review resembles an existing implementation, check which
-extension is canonical for that pattern before accepting the resemblance:
+When code under review resembles an existing implementation, check which extension
+is canonical for that pattern before accepting the resemblance. The pattern-to-
+extension table is **`includes/joomla-canonical-references.md`** — read it at the
+start of a review that turns on "this matches com_X".
 
-| Pattern | Canonical reference |
-|---|---|
-| `getListQuery()`, filters, `LocalTraits` delegation | `com_inventorydata` |
-| Trash / Empty Trash list-view toolbar | `com_inventorydata` |
-| Checkout / check-in (edit locking): Table null support, lock icon, Check-in button, edit-view guard | `com_authenhanced` 1.3.1 (Snaffle) — **for this pattern only**; see `includes/joomla-checkout-checkin-pattern.md` |
-| List sorting from column headings only (no `fullordering` field, no `list[fullorder]` input) | `com_authenhanced` 1.3.1 (Snaffle), `forms/filter_rules.xml` and `tmpl/rules/default.php` |
-| Anything else | `includes/` — the written rule outranks any file |
+Where that file has no entry for a pattern, `includes/` is the reference: the
+written rule outranks any file, and no extension is canonical by default.
 
 Flag code whose only justification is "it matches com_X" where com_X is not
 canonical for that pattern. Say which reference it should have followed.
@@ -908,7 +905,7 @@ Keep `$listOrder` and `$listDirn` in the template: the headings use them. Do not
 `filter_fields`. That list, not the dropdown, is what makes a heading sort work.
 
 Reference: `includes/joomla-coding-preferences.md` → "List Sorting — Column Headings Only".
-Canonical: `com_authenhanced` 1.3.1 (Snaffle).
+Canonical: see `includes/joomla-canonical-references.md`.
 
 ### Checkout / Check-in Not Releasing (⚠️ IMPORTANT)
 
@@ -938,7 +935,7 @@ Any row means check-ins have been writing the wrong values. Say so, and include 
 conversion `UPDATE`s in the fix. Note that **Database → Fix skips `UPDATE` statements**.
 
 **Fix:** follow `includes/joomla-checkout-checkin-pattern.md`, including its review checklist.
-Canonical: `com_authenhanced` 1.3.1 (Snaffle).
+Canonical: see `includes/joomla-canonical-references.md`.
 
 **As a standalone task** ("check whether these extensions have working checkout/check-in"):
 run the table above for every table with a `checked_out` column in every extension in scope,

@@ -238,7 +238,7 @@ SELECT id, checked_out, checked_out_time FROM `#__{table}` WHERE id = {id};
 
 ### Reference implementation
 
-The Snaffle project, `com_authenhanced` 1.3.1 (`E:\repositories\Snaffle\components\com_authenhanced`):
+The canonical implementation for this pattern — see `includes/joomla-canonical-references.md`:
 
 | Concern | File |
 |---|---|

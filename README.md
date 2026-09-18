@@ -95,6 +95,7 @@ This means every agent and conversation in the project automatically has access 
 | File | Purpose |
 |------|---------|
 | **joomla-coding-preferences.md** | Coding standards — namespacing, PHP 8.3+ conventions, design patterns, the preferred `getListQuery()` / `LocalTraits` list-query pattern, version synchronisation, configuration rules, and database schema conventions |
+| **joomla-canonical-references.md** | Which extension holds the reference implementation of each pattern, consulted before accepting that code "matches com_X". **Not in this repository** — it names your own projects, so it is gitignored; create it from `templates/joomla-canonical-references.md.example` |
 | **joomla-devel-environment.md** | Development environment setup — directory paths, source mapping, local server configuration, the PhpStorm MCP server, and PHPStan |
 | **joomla-structure-component.md** | Reference directory and file structure for Joomla components (administrator and site) |
 | **joomla-structure-module.md** | Reference directory and file structure for Joomla modules |
@@ -137,6 +138,7 @@ Templates provide starting points for new projects and extensions. They contain 
 | **CLAUDE.md.joomla-template**                   | Main project CLAUDE.md template — includes project configuration, namespace conventions, agent orchestration workflow, and all `@includes/` references |
 | **CLAUDE.md.joomla-frontend-template**          | Front-end/template design project CLAUDE.md — CSS architecture, template overrides, accessibility, and performance budgets. Copy it by hand; no init script generates it |
 | **Phing/**                                      | Build XML templates copied into extension repositories for packaging and deployment                                                            |
+| **joomla-canonical-references.md.example**      | Starting point for `includes/joomla-canonical-references.md`, the gitignored table of which extension is canonical for which pattern |
 | **phpstan.neon.dist**                           | PHPStan configuration for an extension repository — copy to `phpstan.neon` and set the extension, Joomla instance, and sibling extensions      |
 | **project-ecosystem.accountdata-template.md**   | Data model template for accounting/financial extensions                                                                                        |
 | **project-ecosystem.entitydata-template.md**    | Data model template for entity management extensions (customers, suppliers, contacts)                                                          |

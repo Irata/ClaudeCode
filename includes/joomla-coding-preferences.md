@@ -958,7 +958,7 @@ misleads the next reader:
 
 `/language-audit` lists the orphaned constants as unused once the block is gone.
 
-Reference implementation: the Snaffle project, `com_authenhanced` 1.3.1:
+Reference implementation: see `includes/joomla-canonical-references.md`:
 `forms/filter_rules.xml` and `tmpl/rules/default.php`.
 
 ### Rendering the List Filter Bar (searchtools)
