@@ -30,6 +30,14 @@ History before 2026-09-16 is in the git log.
 
 ### Changed
 
+- **`init_joomla_project.bat` can create a project for more than one repository.**
+  The repository prompt now chooses the layout: name a repository and the project
+  is bound to it exactly as before, receiving `symlink.bat` and the Phing
+  templates; press Enter and the project is created for several repositories,
+  junctioned in afterwards, with those two repository-bound steps skipped and the
+  closing summary giving the junction, PHP, VCS and path-mapping steps. Previously
+  an empty answer meant "use the project name", so a multi-repository project had
+  to be corrected by hand after creation.
 - **`joomla-devel-environment.md` documents a second project layout.** A project
   directory can be the only content root, with each repository reached through a
   junction inside it. Every source file is then under the project directory, so

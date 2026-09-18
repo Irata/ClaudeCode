@@ -213,7 +213,7 @@ The main project initialisation script for **Joomla extension development**. Run
 **Prompts for:**
 - PHPStorm project name
 - Vendor namespace (e.g., `Acme`)
-- Repository folder name (defaults to project name)
+- Repository folder name — **the answer chooses the layout**. Name a repository and the project is bound to that one, as before: it receives `symlink.bat` and the Phing templates. Press Enter instead for a project holding more than one repository, each junctioned into the project directory afterwards; steps 7 and 8 are skipped and the closing summary explains what to do next
 - Joomla domain / folder name (defaults to project name)
 - Database connection name (defaults to `<project>_dev`)
 

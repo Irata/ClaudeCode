@@ -61,10 +61,19 @@ if "%VENDOR_NS%"=="" (
 
 echo.
 echo The repository folder holds your extension source code under %REPOS_DIR%\.
-echo Press Enter to use the project name as the folder name.
-set /p REPO_NAME="Repository folder name [%PROJECT_NAME%]: "
+echo.
+echo   Name a repository  - the project is bound to that one repository, which
+echo                        receives symlink.bat and the Phing templates.
+echo   Press Enter        - the project holds more than one repository. Junction
+echo                        each one into the project directory afterwards.
+echo.
+set /p REPO_NAME="Repository folder name [Enter for multiple repositories]: "
 if "!REPO_NAME!"=="" (
-    set REPO_NAME=%PROJECT_NAME%
+    set MULTI_REPO=1
+    set "REPO_LABEL=multiple - junctioned into the project directory"
+) else (
+    set MULTI_REPO=0
+    set "REPO_LABEL=!REPO_NAME!"
 )
 
 echo.
@@ -98,7 +107,11 @@ echo   Configuration Summary
 echo ============================================
 echo   Project:     %PROJECT_NAME%
 echo   Vendor:      !VENDOR_NS!
-echo   Repository:  %REPOS_DIR%\!REPO_NAME!
+if "!MULTI_REPO!"=="1" (
+    echo   Repository:  !REPO_LABEL!
+) else (
+    echo   Repository:  %REPOS_DIR%\!REPO_NAME!
+)
 echo   Domain:      !DOMAIN!
 echo   DB Conn:     !DB_CONN!
 echo   Project Dir: %PROJECT_DIR%
@@ -155,7 +168,7 @@ set "PS_SCRIPT=!TEMP!\joomla_init_replace.ps1"
     echo $f = '!PROJECT_DIR!\CLAUDE.md'
     echo $c = [System.IO.File]::ReadAllText^($f^)
     echo $c = $c.Replace^('{{VENDOR_NAMESPACE}}', '!VENDOR_NS!'^)
-    echo $c = $c.Replace^('{{REPO_NAME}}', '!REPO_NAME!'^)
+    echo $c = $c.Replace^('{{REPO_NAME}}', '!REPO_LABEL!'^)
     echo $c = $c.Replace^('{{PROJECT_NAME}}', '!PROJECT_NAME!'^)
     echo $c = $c.Replace^('{{COMPONENT_NAME}}', '!PROJECT_NAME!'^)
     echo $c = $c.Replace^('{{DOMAIN}}', '!DOMAIN!'^)
@@ -375,6 +388,11 @@ REM --- Step 7: Symlink symlink.bat into repository ---
 echo.
 echo [7/10] Linking symlink.bat into repository...
 
+if "!MULTI_REPO!"=="1" (
+    echo   Skipped: no single repository. Link symlink.bat into each one as you add it.
+    goto :after_symlink
+)
+
 set "SYMLINK_SOURCE=%CLAUDECODE_DIR%\symlink.bat"
 set "SYMLINK_DEST=%REPOS_DIR%\!REPO_NAME!\symlink.bat"
 
@@ -387,9 +405,16 @@ if not exist "%SYMLINK_SOURCE%" (
     echo   Linked: !SYMLINK_DEST! -^> %SYMLINK_SOURCE%
 )
 
+:after_symlink
+
 REM --- Step 8: Copy Phing build templates ---
 echo.
 echo [8/10] Copying Phing build templates...
+
+if "!MULTI_REPO!"=="1" (
+    echo   Skipped: no single repository. Copy templates\Phing into each one as you add it.
+    goto :after_phing
+)
 
 set "PHING_TEMPLATE_DIR=%CLAUDECODE_DIR%\templates\Phing"
 set "PHING_DEST_DIR=%REPOS_DIR%\!REPO_NAME!\Phing"
@@ -407,6 +432,8 @@ for %%F in ("!PHING_TEMPLATE_DIR!\*.xml") do (
         echo   Exists: %%~nxF
     )
 )
+
+:after_phing
 
 REM --- Step 9: Symlink utility scripts into project directory ---
 echo.
@@ -450,22 +477,43 @@ echo   Agents: %CLAUDE_DIR%\agents\
 echo   Includes: %CLAUDE_DIR%\includes\
 echo   Skills: %CLAUDE_DIR%\skills\
 echo.
-echo   Symlink: %REPOS_DIR%\!REPO_NAME!\symlink.bat -^> ClaudeCode\symlink.bat
-echo   Phing:   %REPOS_DIR%\!REPO_NAME!\Phing\
+if "!MULTI_REPO!"=="1" (
+    echo   Repositories: none yet - junction each one into the project directory
+) else (
+    echo   Symlink: %REPOS_DIR%\!REPO_NAME!\symlink.bat -^> ClaudeCode\symlink.bat
+    echo   Phing:   %REPOS_DIR%\!REPO_NAME!\Phing\
+)
 echo.
 echo   Utility scripts in project directory:
 echo     init_joomla_project.bat -^> ClaudeCode\init_joomla_project.bat
 echo     symlink.bat             -^> ClaudeCode\symlink.bat
 echo     create_skill_symlinks.bat -^> ClaudeCode\skills\create_skill_symlinks.bat
 echo.
-echo   Next steps:
-echo   1. Open project in PHPStorm
-echo   2. Verify CLAUDE.md placeholders are replaced
-echo   3. Update .claude\project-ecosystem.md with your services
-echo   4. Run symlink.bat from the repository to link into Joomla
-echo   5. Start Claude Code in the project directory
-echo   6. Use the joomla-architect agent for design
-echo   7. Use the joomla-orchestrator agent for full builds
+if "!MULTI_REPO!"=="1" (
+    echo   Next steps - multiple repositories:
+    echo   1. Junction each repository into the project directory, where REPO is
+    echo      the repository folder name:
+    echo        mklink /J "%PROJECT_DIR%\REPO" "%REPOS_DIR%\REPO"
+    echo   2. Open project in PHPStorm. Keep the project directory as the only
+    echo      content root - a repository added as a content root as well would be
+    echo      indexed twice.
+    echo   3. Settings, PHP: set the language level and select an interpreter.
+    echo      Settings, PHP, Include paths: add %JOOMLA_DIR%\!DOMAIN!
+    echo   4. Settings, Version Control: confirm a git root per repository
+    echo   5. Run symlink.bat from each repository to link it into Joomla
+    echo   6. Close the project, then write the Xdebug path mappings:
+    echo        powershell -File "%CLAUDECODE_DIR%\scripts\Set-PhpStormJunctionMappings.ps1" -Project %PROJECT_NAME% -Instance !DOMAIN!
+    echo   7. Start Claude Code in the project directory
+) else (
+    echo   Next steps:
+    echo   1. Open project in PHPStorm
+    echo   2. Verify CLAUDE.md placeholders are replaced
+    echo   3. Update .claude\project-ecosystem.md with your services
+    echo   4. Run symlink.bat from the repository to link into Joomla
+    echo   5. Start Claude Code in the project directory
+    echo   6. Use the joomla-architect agent for design
+    echo   7. Use the joomla-orchestrator agent for full builds
+)
 echo.
 
 pause
