@@ -14,6 +14,16 @@ History before 2026-09-16 is in the git log.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Placeholder hints no longer end up inside the value.** All three `CLAUDE.md`
+  templates carried parentheticals beside their placeholders — `{{EXTENSION_TYPE}}
+  (Component/Module/Plugin)` — which read as part of the answer once filled in, so
+  every generated file said things like "Component with console plugins
+  (Component/Module/Plugin)". The guidance moves into a block comment above the
+  list, which Claude Code strips before the file reaches context, so it stays
+  available to whoever fills the file in and costs nothing to keep.
+
 ## [2026-09-18]
 
 ### Added

@@ -2,13 +2,24 @@
 
 ## Project Configuration
 
+<!--
+  Filling these in by hand:
+    CSS Framework  - Bootstrap 5, Tailwind CSS or Custom
+    Build Tool     - Vite, Webpack or None
+    Project Status - Active, Maintenance or Archived
+  Guidance lives here rather than beside each value, because a parenthetical
+  next to a placeholder ends up reading as part of the answer once it is
+  filled in. Block comments are stripped before the file reaches Claude's
+  context, so this costs nothing to keep.
+-->
+
 - **Project Name**: {{PROJECT_NAME}}
 - **Template Name**: {{TEMPLATE_NAME}}
-- **CSS Framework**: {{CSS_FRAMEWORK}} (Bootstrap 5/Tailwind CSS/Custom)
-- **Build Tool**: {{BUILD_TOOL}} (Vite/Webpack/None)
+- **CSS Framework**: {{CSS_FRAMEWORK}}
+- **Build Tool**: {{BUILD_TOOL}}
 - **PHP Version**: 8.3+
 - **Joomla Version**: 5.2+
-- **Project Status**: {{PROJECT_STATUS}} (Active/Maintenance/Archived)
+- **Project Status**: {{PROJECT_STATUS}}
 
 ## Directory Paths
 

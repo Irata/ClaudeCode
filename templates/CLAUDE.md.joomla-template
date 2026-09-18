@@ -2,12 +2,23 @@
 
 ## Project Configuration
 
+<!--
+  Filling these in by hand:
+    Extension Type   - Component, Module or Plugin
+    Vendor Namespace - the vendor segment of the PHP namespace, e.g. Acme
+    Project Status   - Active, Maintenance or Archived
+  Guidance lives here rather than beside each value, because a parenthetical
+  next to a placeholder ends up reading as part of the answer once it is
+  filled in. Block comments are stripped before the file reaches Claude's
+  context, so this costs nothing to keep.
+-->
+
 - **Project Name**: {{PROJECT_NAME}}
-- **Extension Type**: {{EXTENSION_TYPE}} (Component/Module/Plugin)
-- **Vendor Namespace**: {{VENDOR_NAMESPACE}} (e.g., Acme, Emporium)
+- **Extension Type**: {{EXTENSION_TYPE}}
+- **Vendor Namespace**: {{VENDOR_NAMESPACE}}
 - **PHP Version**: 8.5+ (typed properties, constructor promotion, readonly, enums, `#[Override]`)
 - **Joomla Version**: 5.2+ (Joomla Framework 2.0+)
-- **Project Status**: {{PROJECT_STATUS}} (Active/Maintenance/Archived)
+- **Project Status**: {{PROJECT_STATUS}}
 
 ## Directory Paths
 
