@@ -14,6 +14,22 @@ History before 2026-09-16 is in the git log.
 
 ## [Unreleased]
 
+### Added
+
+- **`scripts/Update-PhpStormMcp.ps1`** — rediscovers the PhpStorm MCP server's port
+  and re-registers it. The IDE assigns that port and Claude Code stores it as a
+  fixed URL, so the two drift apart after an upgrade; the only symptom is every
+  session reporting that `phpstorm` failed to connect, with nothing to say where it
+  moved to. The script asks each port PhpStorm is listening on to answer an MCP
+  `initialize` and re-registers only when the answer differs from what is stored.
+  `-DryRun` reports without changing anything.
+
+### Fixed
+
+- **Two lost backslashes in `joomla-devel-environment.md`**, which read
+  `.claudeincludes` for `.claude\includes`. Written through a shell heredoc that
+  silently dropped them.
+
 ## [2026-09-17]
 
 ### Added

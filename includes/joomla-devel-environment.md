@@ -73,7 +73,7 @@ analysis, structural search, its full inspection set with quick-fix names, the
 database tools, and Xdebug session control. Its definition is kept in
 `includes/.mcp.json`, but **Claude Code does not read that file** — it loads
 `.mcp.json` only from a project root, and this one is linked into
-`.claudeincludes`. Register the server once per machine at user scope instead,
+`.claude\includes`. Register the server once per machine at user scope instead,
 which makes it available in every project:
 
 ```bash
@@ -112,20 +112,17 @@ project layout does not affect them. The `id` returned by
 text tree whose variable names keep their `$`.
 
 **The port is assigned by the IDE and is not guaranteed stable across upgrades.**
-If the server stops answering, rediscover it rather than guessing — find the
-PhpStorm process, then probe its listening ports for the one that answers an MCP
-`initialize`:
+When every session reports that `phpstorm` failed to connect, the port has usually
+moved. Rediscover and re-register it with the script rather than hunting for it:
 
-```bash
-netstat -ano | grep -i listen | awk '$5==<phpstorm-pid> {print $2}' | sed 's/.*://' | sort -un
-curl -s -i -X POST "http://127.0.0.1:<port>/stream" \
-  -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' \
-  -d '{"jsonrpc":"2.0","id":"1","method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"probe","version":"1"}}}'
+```
+powershell -File scripts\Update-PhpStormMcp.ps1
 ```
 
-The port that returns an `mcp-session-id` header and a `PhpStorm MCP Server`
-`serverInfo` is the one. Re-register with that port: `claude mcp remove phpstorm
---scope user`, then the `claude mcp add` command above.
+It asks each port PhpStorm is listening on to answer an MCP `initialize`, takes the
+one identifying itself as the PhpStorm MCP Server, and re-registers only if that
+differs from what is stored. `-DryRun` reports without changing anything, and
+sessions already open keep the old value until they restart.
 
 **PhpStorm must be running.** The server lives inside the IDE, so every tool here
 fails when it is closed. This is a working-session tool, not something a

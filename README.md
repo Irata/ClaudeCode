@@ -264,6 +264,16 @@ powershell -File scripts\Link-ClaudeShared.ps1 -Kind all -Project <name>
 
 Run it once in any project set up with the earlier per-file symlinks to migrate it. The old link folders are replaced only when they contain nothing but links — if one holds a real file, the script stops and reports it rather than deleting it.
 
+### `scripts/Update-PhpStormMcp.ps1`
+
+Rediscovers the PhpStorm MCP server's port and re-registers it with Claude Code when it has moved.
+
+```
+powershell -File scripts\Update-PhpStormMcp.ps1
+```
+
+PhpStorm assigns the port its MCP server listens on, while Claude Code stores it as a fixed URL. When the two drift apart — after an IDE upgrade, or a change in what else is listening — every session reports that `phpstorm` failed to connect, with nothing to say which port it moved to. The script asks each port PhpStorm is listening on to answer an MCP `initialize`, takes the one that identifies itself as the PhpStorm MCP Server, and re-registers only if it differs from what is stored. `-DryRun` reports without changing anything. PhpStorm must be running, and sessions already open keep the old value until they restart.
+
 ### `scripts/Set-PhpStormPathMappings.ps1`
 
 Injects xDebug-compatible "doubled" path mappings into a PhpStorm project's `workspace.xml` for symlinked (junctioned) Joomla extensions. Because PhpStorm's *Settings → PHP → Servers* UI cannot create two mappings sharing the same local root, and xDebug 3.3+ may report a file under either the deployed `www` path **or** the resolved repository path, both must map back to the single repository local root. For each junction (`<www>\...\com_x → E:\repositories\<repo>\...\com_x`) the script emits the required pair and writes them directly into `workspace.xml`.
