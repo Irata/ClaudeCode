@@ -14,8 +14,21 @@ History before 2026-09-16 is in the git log.
 
 ## [Unreleased]
 
+## [2026-09-18]
+
 ### Added
 
+- **The column-visibility toggle is required on admin list views.** `table.columns`
+  is core's own asset, loaded by every core list, but it was missing from the shared
+  knowledge, so components were built without the Columns dropdown and wide lists
+  stayed unusable on a laptop. The rule lives in the coding preferences; the
+  builder, reviewer and migration agent point at it. Its gotchas are read off
+  `table-columns.js` itself rather than assumed.
+- **`includes/joomla-checkout-checkin-pattern.md`** — edit locking wired to core:
+  `$_supportNullValue` on the Table, the list-view lock and Check-in button, the
+  edit-view guard, and the language keys each implies.
+- **`/language-audit` skill** — audits language files for missing, unused and
+  malformed constants.
 - **`scripts/Update-PhpStormMcp.ps1`** — rediscovers the PhpStorm MCP server's port
   and re-registers it. The IDE assigns that port and Claude Code stores it as a
   fixed URL, so the two drift apart after an upgrade; the only symptom is every
@@ -53,19 +66,6 @@ History before 2026-09-16 is in the git log.
   the rule still holds — `includes/` is then the reference — but no extension is
   named as canonical for anything.
 
-### Fixed
-
-- **Local project, repository and site names replaced with placeholders** in
-  `joomla-devel-environment.md` and both PhpStorm scripts. This repository is
-  public, and the examples named real projects and a real Joomla instance.
-
-### Removed
-
-- **`init_joomla_frontend.bat`.** The front-end project initialiser is gone, and
-  the README no longer offers it as an alternative to `init_joomla_project.bat`.
-  `templates/CLAUDE.md.joomla-frontend-template` stays — copy it by hand for a
-  template-design project.
-
 ### Changed
 
 - **A multi-repository project is generated from the thin template.**
@@ -95,7 +95,18 @@ History before 2026-09-16 is in the git log.
   Xdebug mappings must use the junction path as `local-root`, or a breakpoint binds
   and the IDE then reports the file as outside the project.
 
+### Removed
+
+- **`init_joomla_frontend.bat`.** The front-end project initialiser is gone, and
+  the README no longer offers it as an alternative to `init_joomla_project.bat`.
+  `templates/CLAUDE.md.joomla-frontend-template` stays — copy it by hand for a
+  template-design project.
+
 ### Fixed
+
+- **Local project, repository and site names replaced with placeholders** in
+  `joomla-devel-environment.md` and both PhpStorm scripts. This repository is
+  public, and the examples named real projects and a real Joomla instance.
 
 - **Two lost backslashes in `joomla-devel-environment.md`**, which read
   `.claudeincludes` for `.claude\includes`. Written through a shell heredoc that
@@ -257,6 +268,7 @@ rebuilds the code reviewer around checks drawn from those defects.
 - **`joomla-less-builder` is now under version control.** It was gitignored, so it
   was the one agent a clone of this repository did not receive.
 
-[Unreleased]: https://github.com/Irata/ClaudeCode/compare/747c251...HEAD
+[Unreleased]: https://github.com/Irata/ClaudeCode/compare/9169ca6...HEAD
+[2026-09-18]: https://github.com/Irata/ClaudeCode/compare/747c251...9169ca6
 [2026-09-17]: https://github.com/Irata/ClaudeCode/compare/bdaa322...747c251
 [2026-09-16]: https://github.com/Irata/ClaudeCode/compare/d2e1750...bdaa322
