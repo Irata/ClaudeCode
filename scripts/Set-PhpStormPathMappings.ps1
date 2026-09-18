@@ -24,11 +24,11 @@
 
 .PARAMETER ProjectDir
     The PhpStorm project directory (the folder that contains the .idea sub-folder).
-    e.g. "E:\PHPStorm Project Files\LL_Inventory2"
+    e.g. "E:\PHPStorm Project Files\MyProject"
 
 .PARAMETER WwwInstance
     The deployed www instance folder name under E:\www to scan for junctions.
-    e.g. "Buffalo5"
+    e.g. "mysite"
 
 .PARAMETER ServerHost
     Only servers in workspace.xml whose host matches this get the mappings.
@@ -43,7 +43,7 @@
 .PARAMETER OnlyRepo
     Optional list of repo folder names (under RepoRoot) to restrict mapping to.
     Omit to map every repo junction found in the instance (default: whole instance).
-    e.g. -OnlyRepo LL_inventory2,Payments
+    e.g. -OnlyRepo repo-one,repo-two
 
 .PARAMETER Apply
     Actually write workspace.xml. Without it, the script only previews (dry run).
@@ -52,12 +52,12 @@
     Skip the timestamped .bak copy that -Apply makes before writing.
 
 .EXAMPLE
-    # Preview what would be written for the LL_Inventory2 project / Buffalo5 instance:
-    .\Set-PhpStormPathMappings.ps1 -ProjectDir "E:\PHPStorm Project Files\LL_Inventory2" -WwwInstance Buffalo5
+    # Preview what would be written for a project and instance:
+    .\Set-PhpStormPathMappings.ps1 -ProjectDir "E:\PHPStorm Project Files\MyProject" -WwwInstance mysite
 
 .EXAMPLE
     # After closing PhpStorm, write it:
-    .\Set-PhpStormPathMappings.ps1 -ProjectDir "E:\PHPStorm Project Files\LL_Inventory2" -WwwInstance Buffalo5 -Apply
+    .\Set-PhpStormPathMappings.ps1 -ProjectDir "E:\PHPStorm Project Files\MyProject" -WwwInstance mysite -Apply
 #>
 [CmdletBinding()]
 param(

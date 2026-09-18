@@ -99,14 +99,15 @@ as content roots from `E:\repositories`. Tested against that layout:
   the path is given relative or absolute.
 - **Does not resolve PHP:** `analyze_calls` rejects every form of PHP symbol name.
 
-*Junction layout (proven on `LandscapeLink`, 2026-09-18).* The project directory is
-the only content root, and each repository is reached through a junction inside it:
+*Junction layout (proven 2026-09-18 on a project holding three repositories).* The
+project directory is the only content root, and each repository is reached through
+a junction inside it:
 
 ```
-E:\PHPStorm Project Files\LandscapeLink\
-├── LL_inventory2\        ->  E:\repositories\LL_inventory2
-├── purchases\            ->  E:\repositories\purchases
-└── sales_landscapelink\  ->  E:\repositories\sales_landscapelink
+E:\PHPStorm Project Files\_project_\
+├── _repo-one_\    ->  E:\repositories\_repo-one_
+├── _repo-two_\    ->  E:\repositories\_repo-two_
+└── _repo-three_\  ->  E:\repositories\_repo-three_
 ```
 
 Every source file is then under the project directory, so the `filePath` tools work

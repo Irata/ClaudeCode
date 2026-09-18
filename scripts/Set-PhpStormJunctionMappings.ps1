@@ -32,8 +32,8 @@
     Report the mappings without writing them.
 
 .EXAMPLE
-    powershell -File scripts\Set-PhpStormJunctionMappings.ps1 -Project LandscapeLink -Instance Buffalo5
-    powershell -File scripts\Set-PhpStormJunctionMappings.ps1 -Project LandscapeLink -Instance Buffalo5 -DryRun
+    powershell -File scripts\Set-PhpStormJunctionMappings.ps1 -Project MyProject -Instance mysite
+    powershell -File scripts\Set-PhpStormJunctionMappings.ps1 -Project MyProject -Instance mysite -DryRun
 #>
 
 [CmdletBinding()]

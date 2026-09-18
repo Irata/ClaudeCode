@@ -28,6 +28,12 @@ History before 2026-09-16 is in the git log.
   for a project whose repositories are junctioned into the project directory,
   deriving them from the links in the Joomla instance rather than a hand-kept list.
 
+### Fixed
+
+- **Local project, repository and site names replaced with placeholders** in
+  `joomla-devel-environment.md` and both PhpStorm scripts. This repository is
+  public, and the examples named real projects and a real Joomla instance.
+
 ### Removed
 
 - **`init_joomla_frontend.bat`.** The front-end project initialiser is gone, and
