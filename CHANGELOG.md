@@ -24,6 +24,25 @@ History before 2026-09-16 is in the git log.
   `initialize` and re-registers only when the answer differs from what is stored.
   `-DryRun` reports without changing anything.
 
+- **`scripts/Set-PhpStormJunctionMappings.ps1`** — generates Xdebug path mappings
+  for a project whose repositories are junctioned into the project directory,
+  deriving them from the links in the Joomla instance rather than a hand-kept list.
+
+### Changed
+
+- **`joomla-devel-environment.md` documents a second project layout.** A project
+  directory can be the only content root, with each repository reached through a
+  junction inside it. Every source file is then under the project directory, so
+  PhpStorm's `filePath` tools — inspections included — work, where the content-root
+  layout refuses them. Several repositories can share one project, each keeping its
+  own git root. Proven end to end on 2026-09-18: inspections, symbol resolution,
+  three git roots and a bound breakpoint.
+
+  Two conditions matter. The old `../../repositories/...` content roots must be
+  removed, or each file is reachable twice and every class is indexed twice. And the
+  Xdebug mappings must use the junction path as `local-root`, or a breakpoint binds
+  and the IDE then reports the file as outside the project.
+
 ### Fixed
 
 - **Two lost backslashes in `joomla-devel-environment.md`**, which read

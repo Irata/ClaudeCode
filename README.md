@@ -264,6 +264,18 @@ powershell -File scripts\Link-ClaudeShared.ps1 -Kind all -Project <name>
 
 Run it once in any project set up with the earlier per-file symlinks to migrate it. The old link folders are replaced only when they contain nothing but links — if one holds a real file, the script stops and reports it rather than deleting it.
 
+### `scripts/Set-PhpStormJunctionMappings.ps1`
+
+Writes Xdebug path mappings for a project whose repositories are junctioned into the project directory.
+
+```
+powershell -File scripts\Set-PhpStormJunctionMappings.ps1 -Project <name> -Instance <joomla-instance>
+```
+
+It reads the junctions in the project directory, finds every link in the Joomla instance pointing into one of those repositories, and writes a mapping pair for each — the served path, which Xdebug uses to match a breakpoint, and the resolved repository path, which it uses to report one — both against the junction path as `local-root`. A single mapping for Joomla core is added, and `use_path_mappings` is enabled on every server.
+
+The script owns the servers' mapping list and replaces it, so junction a further repository and run it again. `-ServerHost` corrects the host the servers match on, `-DryRun` reports without writing, and `workspace.xml` is backed up first. The target project must be **closed** — PhpStorm rewrites `workspace.xml` when a project closes — though the IDE itself can stay open with other projects; the script checks which are open and refuses only if this one is.
+
 ### `scripts/Update-PhpStormMcp.ps1`
 
 Rediscovers the PhpStorm MCP server's port and re-registers it with Claude Code when it has moved.

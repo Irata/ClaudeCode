@@ -82,7 +82,9 @@ claude mcp add --scope user --transport http phpstorm http://127.0.0.1:<port>/st
 
 Confirm it from a project directory with `claude mcp list`.
 
-**What works with this project layout.** A PhpStorm project directory
+**Two project layouts, and they differ in what the tools can reach.**
+
+*Content-root layout (the original).* A PhpStorm project directory
 (`E:\PHPStorm Project Files\<name>`) holds no source — the repository is attached
 as content roots from `E:\repositories`. Tested against that layout:
 
@@ -96,6 +98,36 @@ as content roots from `E:\repositories`. Tested against that layout:
   `xdebug_run_to_line` — because the file is outside the project directory, whether
   the path is given relative or absolute.
 - **Does not resolve PHP:** `analyze_calls` rejects every form of PHP symbol name.
+
+*Junction layout (proven on `LandscapeLink`, 2026-09-18).* The project directory is
+the only content root, and each repository is reached through a junction inside it:
+
+```
+E:\PHPStorm Project Files\LandscapeLink\
+├── LL_inventory2\        ->  E:\repositories\LL_inventory2
+├── purchases\            ->  E:\repositories\purchases
+└── sales_landscapelink\  ->  E:\repositories\sales_landscapelink
+```
+
+Every source file is then under the project directory, so the `filePath` tools work
+— `get_file_problems` and `get_inspections` return real findings, with paths written
+`<junction>/admin/com_x/...`. Several repositories can share one project, each with
+its own git root, and the IDE indexes them together.
+
+Two things this layout depends on:
+
+- **Remove the old `../../repositories/...` content roots.** Leaving them means the
+  same file is reachable twice, and every class is indexed twice — `search_symbol`
+  returns two hits per class, and Go to Class offers duplicates. One route per file
+  is the whole point.
+- **Xdebug mappings must name the junction path** as their `local-root`, or a
+  breakpoint binds and the IDE then reports the file as outside the project.
+  `scripts/Set-PhpStormJunctionMappings.ps1` derives them from the filesystem.
+
+A new project also needs the PHP include path set to the Joomla instance and a
+language level chosen. Without them every `Joomla\CMS\...` class is undefined, which
+cascades: the parent class is unknown, so inherited methods read as missing and
+properties as dynamic — around forty false findings in a single model.
 
 Every tool also needs `projectPath` set to the PhpStorm project directory, with that
 project open in the IDE; otherwise it answers with the list of open projects. For
