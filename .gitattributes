@@ -1,0 +1,22 @@
+# Line endings are LF, in the repository and in the working tree.
+#
+# The agents, includes and skills here are junctioned into every project that
+# uses them, so a CRLF checkout on one machine would change what each of those
+# projects reads. core.autocrlf is a per-machine setting; .gitattributes
+# overrides it, so the answer travels with the repository.
+* text=auto eol=lf
+
+# Windows tooling that genuinely wants CRLF: cmd.exe can mis-read labels and
+# goto targets in an LF batch file.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Never transformed.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.zip binary
+*.pdf binary

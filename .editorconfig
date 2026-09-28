@@ -1,0 +1,12 @@
+# Editors write LF, matching .gitattributes. PhpStorm honours this file by default,
+# so a save can no longer put CRLF back into the working tree that Buffalo5 and
+# Phing read from.
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+
+# Windows tooling that genuinely wants CRLF, as pinned in .gitattributes.
+[*.{bat,cmd,ps1}]
+end_of_line = crlf
