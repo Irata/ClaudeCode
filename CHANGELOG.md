@@ -76,6 +76,34 @@ History before 2026-09-16 is in the git log.
 
 ### Fixed
 
+- **A column sort now survives paging.** The previous rule was never to add a
+  hidden `list[fullordering]` input, on the grounds that `searchtools.js` creates
+  one. It does, but that field is valued `null ASC`. A heading click overwrites the
+  value, so the first sort works. Every later pagination, limit or search submit
+  then posts `null ASC`, `populateState()` rejects it, and the list falls back to
+  its default order. The rule is reversed: the list `<form>` carries exactly one
+  `list[fullordering]` input with `id="list_fullordering"` and its value on a
+  single line. "List Sorting — Column Headings Only" in the coding preferences
+  lists every way the sort is lost: a missing input, one named `list[fullorder]`,
+  a value wrapped across lines, a duplicate `fullordering` select in the filter
+  XML, and `filter_fields` that never reaches the model. `joomla-admin-builder`
+  now writes the input and tests sorting past page one. `joomla-code-reviewer`
+  reports a lost sort as ⚠️ IMPORTANT and no longer suggests removing the input
+  as a leftover. `joomla-debugger` treats the symptom as a form fault rather
+  than a query fault.
+
+  **Action required** in any project built under the old rule: add the input
+  to each admin list template, just inside the list `<form>`:
+
+  ```php
+  <input type="hidden" name="list[fullordering]" id="list_fullordering" value="<?php echo $listOrder; ?> <?php echo $listDirn; ?>"/>
+  ```
+
+  Rename any `list[fullorder]` input rather than deleting it, and remove any live
+  `fullordering` select from the filter XML. To find affected views, run the
+  `joomla-code-reviewer` agent; to confirm a fix, sort by a column and then go to
+  page two.
+
 - **Placeholder hints no longer end up inside the value.** All three `CLAUDE.md`
   templates carried parentheticals beside their placeholders — `{{EXTENSION_TYPE}}
   (Component/Module/Plugin)` — which read as part of the answer once filled in, so
