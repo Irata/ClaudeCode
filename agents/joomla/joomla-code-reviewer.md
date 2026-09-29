@@ -732,6 +732,36 @@ sibling forms.
 **Fix:** set both pairs in one place on insert — the `Table`, not each caller.
 Apply it to every table in the extension, not just the one that surfaced it.
 
+### Nullable Date Not Normalised in `check()` (⚠️ IMPORTANT)
+
+A nullable `DATE`/`DATETIME` column whose `check()` does not coerce empty and zero
+values to `null`. A `type="calendar"` field bound to a `NULL` column renders an
+empty input and posts `''`, and `STRICT_TRANS_TABLES` rejects `''` for a date —
+so **the entire row fails to save**, not just that column.
+
+**Detection:** for each Table with a nullable date column, look in `check()` for a
+coercion to `null`. Flag three variants:
+
+- no coercion at all;
+- an emptiness test of `empty()` or `!$value` only — `'0000-00-00'` is truthy in
+  PHP and passes straight through;
+- coercion present in one Table but not in a sibling Table bound to the same
+  physical table (components with separate admin and site forms routinely carry a
+  duplicated `check()`).
+
+**Also flag the two cover-ups**, which hide the failure by fabricating data:
+`default="NOW"` on an optional date field in `forms/*.xml` (`Form::getValue()`
+cannot distinguish a NULL existing value from a new record, so it fires for both),
+and a `check()` that backfills the column from `created` or `now`. Date stamping
+tied to an actual change — an `onchange` hook, or a controller that stamps only
+when the value it describes is posted — is correct and must not be flagged.
+
+**Never accept an `ALTER TABLE … NULL` as the fix.** The column is already
+nullable; that migration is inert. Flag it as a separate finding if present.
+
+**Fix:** `includes/joomla-table-check-helpers-pattern.md`, including its review
+checklist.
+
 ### Raw Text Field for a User ID (⚠️ IMPORTANT)
 
 A column holding a Joomla user id must use the user-picker field. A `type="text"`

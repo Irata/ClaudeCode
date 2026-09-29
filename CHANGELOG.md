@@ -35,6 +35,24 @@ History before 2026-09-16 is in the git log.
   **Action required** to use it: run `skills\create_skill_symlinks.bat` in a project
   to link the new skill.
 
+- **`includes/joomla-table-check-helpers-pattern.md`** — composable `Table::check()`
+  helpers, written up after the same problem was solved independently in four
+  extensions. A nullable `DATE`/`DATETIME` column that is genuinely empty cannot be
+  saved: a calendar field bound to a `NULL` column posts `''`, and
+  `STRICT_TRANS_TABLES` rejects `''` for a date, so the whole row fails with
+  *"Incorrect date value"*. The instinct is to reach for the schema, and that fix is
+  always inert — the column is already nullable. The include carries the mechanism
+  (where `''` and `'0000-00-00'` come from, why `null` is enough given that
+  `updateObject()` skips nulls, and why `$_supportNullValue` is irrelevant outside
+  checkout), the converged helper set with date columns auto-detected from
+  `getFields()` metadata and a `timestampColumns()` exclusion hook, the `default="NOW"`
+  cover-up that hides the failure by fabricating a date for every existing NULL row,
+  a review checklist and a verification procedure. `com_viewscape`/`com_harmony`
+  hold the fullest implementation; `com_forum` and `com_inventory` the explicit-list
+  variants. Wired into `joomla-code-reviewer` as a new ⚠️ IMPORTANT finding (including
+  "never accept an `ALTER` as the fix"), into `joomla-admin-builder`'s Table rules, and
+  cross-referenced from `joomla-coding-preferences.md`.
+
 ### Fixed
 
 - **Placeholder hints no longer end up inside the value.** All three `CLAUDE.md`

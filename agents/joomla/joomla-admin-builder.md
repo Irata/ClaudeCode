@@ -887,6 +887,12 @@ Place this immediately before the title link in the title `<td>`.
 - **Tables with `checked_out` MUST declare `protected $_supportNullValue = true;`.** Without it,
   `Table::checkIn()` writes `0` and a zero date instead of `NULL`, and no record ever returns to its
   checked-in state. See `includes/joomla-checkout-checkin-pattern.md`.
+- **Tables with a nullable `DATE`/`DATETIME` column MUST normalise it in `check()`**, coercing
+  `''` and `'0000-00-00'` to `null`. A calendar field bound to a `NULL` column posts `''`, and
+  `STRICT_TRANS_TABLES` rejects that for a date — the whole row fails to save. Do not give an
+  optional date field `default="NOW"` to paper over it: the default fires for existing NULL rows
+  as well as new ones, so it fabricates data. See
+  `includes/joomla-table-check-helpers-pattern.md`.
 - **Before writing any override, read the parent class method to confirm its exact signature** — parameter types, default values, and return type MUST match exactly. Joomla core often omits type declarations; adding types the parent lacks causes a PHP `Compile Error`. For example, `Table::_getAssetParentId(?Table $table = null, $id = null)` has no type on `$id` and no return type.
 - These are shared between admin and site — place in Administrator namespace
 - For per-item ACL, implement `_getAssetName()`, `_getAssetTitle()`, and `_getAssetParentId()` — matching the parent signatures exactly
