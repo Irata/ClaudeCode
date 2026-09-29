@@ -9,6 +9,7 @@
 | `/rebuild-includes` | Regenerate the dynamic include files (available-agents.md and available-skills.md) by scanning agent and skill directories for frontmatter | `/rebuild-includes` |
 | `/ship` | Commit the working tree as scoped per-extension Conventional Commits, then merge to main, delete the branch and push | `/ship` |
 | `/work-log` | Scan the repository for file modifications and append structured daily entries to the project work log | `/work-log include today` |
+| `/work-log-summary` | Consolidate every project's work log into one date-ordered table — date, day, project, work performed — with days worked per project per month, as the starting point for invoicing | `/work-log-summary [yyyy-MM or yyyy-MM-dd yyyy-MM-dd] [csv]` |
 
 ### Joomla
 

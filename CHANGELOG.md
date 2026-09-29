@@ -53,6 +53,27 @@ History before 2026-09-16 is in the git log.
   "never accept an `ALTER` as the fix"), into `joomla-admin-builder`'s Table rules, and
   cross-referenced from `joomla-coding-preferences.md`.
 
+- **`/work-log-summary` skill and `scripts/Summarise-WorkLogs.ps1`** — consolidate
+  every project's `Files\work-log.md` into one file outside any project. `/work-log`
+  keeps its log per repository, which is the wrong shape for billing: a period has
+  to be read across every project at once, and doing that by hand meant opening each
+  log in turn. The file is one table — date, day, project, work performed — with a
+  row for each day a project was worked on, oldest first, then days logged per
+  project per month. It runs by date rather than by project because an invoice is
+  prepared for a period, and grouping by project scatters a period across every
+  section. `2026-08` or a pair of dates limits the period, and `csv` also writes the
+  rows for a spreadsheet. Work performed is each entry's "In short" line, extracted
+  rather than re-summarised, so the file traces back to the logs and an unchanged log
+  always gives the same result. Several entries for one day share a row, and a date
+  heading with nothing under it is reported and not counted as a day worked.
+
+  **Action required** to use it: run `skills\create_skill_symlinks.bat` in a project
+  to link the new skill. Optionally set `WORK_LOG_SUMMARY` (the file written) and
+  `WORK_LOG_EXCLUDE` (directories to leave out, such as `* - backup;* - Copy`, whose
+  copied work logs would count the same days twice) in `config.bat`;
+  `config.bat.example` shows both. Without them the summary is written beside
+  `REPOS_DIR` and nothing is left out.
+
 ### Fixed
 
 - **Placeholder hints no longer end up inside the value.** All three `CLAUDE.md`

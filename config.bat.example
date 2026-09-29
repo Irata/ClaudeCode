@@ -14,3 +14,12 @@ SET REPOS_DIR=E:\repositories
 
 REM Base directory where local Joomla instances are installed
 SET JOOMLA_DIR=E:\www
+
+REM File /work-log-summary writes, consolidating every Files\work-log.md under
+REM REPOS_DIR. Optional: defaults to work-log-summary.md beside REPOS_DIR.
+SET WORK_LOG_SUMMARY=E:\work-log-summary.md
+
+REM Project directories /work-log-summary leaves out, as semicolon-separated
+REM wildcards. A backup or copy of a repository carries a copy of its work log,
+REM and would count the same days twice. Optional.
+SET WORK_LOG_EXCLUDE=* - backup;* - Copy

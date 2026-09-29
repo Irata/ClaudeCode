@@ -25,7 +25,8 @@ ClaudeCode/
 │   ├── pr-summary/
 │   ├── rebuild-includes/
 │   ├── ship/
-│   └── work-log/
+│   ├── work-log/
+│   └── work-log-summary/
 ├── templates/
 │   ├── CLAUDE.md.joomla-template
 │   ├── CLAUDE.md.joomla-frontend-template
@@ -34,7 +35,8 @@ ClaudeCode/
 │   └── (project-ecosystem templates)
 ├── scripts/
 │   ├── Link-ClaudeShared.ps1
-│   └── Set-PhpStormPathMappings.ps1
+│   ├── Set-PhpStormPathMappings.ps1
+│   └── Summarise-WorkLogs.ps1
 ├── docs/
 │   ├── agent-usage-guide.md
 │   ├── git-railway.md
@@ -125,6 +127,7 @@ Skill files live in `.claude/skills/` within each project and provide Claude Cod
 |-------|---------|
 | **conversation-log** | Logs conversation summaries and decisions for project continuity |
 | **work-log** | Records work sessions with progress, blockers, and next steps |
+| **work-log-summary** | Consolidates every project's work log into one file outside any project — a date-ordered table of date, day, project and work performed, then days worked per project per month — as the starting point for invoicing |
 | **pr-summary** | Summarises the commits on the current branch into a markdown Pull Request description |
 | **rebuild-includes** | Regenerates the `available-agents.md` and `available-skills.md` include catalogues from the agent and skill source files |
 | **ship** | Commits the working tree as one commit per extension, merges to `main`, deletes the branch, and pushes — writing and releasing `CHANGELOG.md` entries where a repository keeps one |
@@ -162,6 +165,8 @@ Edit `config.bat` to match your directory layout:
 | `PROJECTS_DIR` | Where PHPStorm projects are created | `E:\PHPStorm Project Files` |
 | `REPOS_DIR` | Where git repositories are cloned | `E:\repositories` |
 | `JOOMLA_DIR` | Where local Joomla instances live | `E:\www` |
+| `WORK_LOG_SUMMARY` | The file `/work-log-summary` writes. Optional | `work-log-summary.md` beside `REPOS_DIR` |
+| `WORK_LOG_EXCLUDE` | Project directories `/work-log-summary` leaves out, as semicolon-separated wildcards. Optional | none |
 
 `config.bat` is gitignored — it will not be overwritten by updates.
 
@@ -278,6 +283,22 @@ powershell -File scripts\Update-PhpStormMcp.ps1
 ```
 
 PhpStorm assigns the port its MCP server listens on, while Claude Code stores it as a fixed URL. When the two drift apart — after an IDE upgrade, or a change in what else is listening — every session reports that `phpstorm` failed to connect, with nothing to say which port it moved to. The script asks each port PhpStorm is listening on to answer an MCP `initialize`, takes the one that identifies itself as the PhpStorm MCP Server, and re-registers only if it differs from what is stored. `-DryRun` reports without changing anything. PhpStorm must be running, and sessions already open keep the old value until they restart.
+
+### `scripts/Summarise-WorkLogs.ps1`
+
+Consolidates every `Files\work-log.md` under `REPOS_DIR` into one Markdown file. It is what the `/work-log-summary` skill runs, and can be run directly.
+
+```
+powershell -File scripts\Summarise-WorkLogs.ps1 [-Month 2026-08] [-From 2026-07-01 -To 2026-09-30] [-Csv]
+```
+
+The work logs are per repository; billing needs every project side by side for one period. The file is one table — `Date | Day | Project | Work performed` — with a row for each day a project was worked on, oldest first, followed by a table of days logged per project per month. It is ordered by date rather than grouped by project because an invoice is prepared for a period, and a project grouping scatters one period across every section. Work performed is the entry's `In short` line, extracted rather than rewritten, so every row traces back to a work log and an unchanged log always gives the same summary. The file is rebuilt in full on each run — correct the work log, never the summary.
+
+- **`-Month`**, or **`-From`** and **`-To`** — limit the period; the default is everything
+- **`-Csv`** — also write the same rows to a `.csv` beside the Markdown file, with each day's focus and area headings as further columns
+- **`-Root`**, **`-OutFile`**, **`-Exclude`** — override `REPOS_DIR`, `WORK_LOG_SUMMARY` and `WORK_LOG_EXCLUDE` from `config.bat`
+
+A day counts once per project however many entries it has: when a log returns to a day under a second heading, the entries share one row. An entry with a date heading and nothing under it is reported and left out, so it is not counted as a day worked. Set `WORK_LOG_EXCLUDE` for backups and copies of a repository: each carries a copy of the work log and would count the same days twice.
 
 ### `scripts/Set-PhpStormPathMappings.ps1`
 
