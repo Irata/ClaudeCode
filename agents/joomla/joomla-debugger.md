@@ -143,6 +143,15 @@ files never ran. Confirm with `SHOW COLUMNS`, then check `#__schemas` for the ex
 nobody was warned. See `includes/joomla-listmodel-error-handling.md` and the `#__schemas` sections
 of `includes/joomla-coding-preferences.md`.
 
+**A column sort that is lost on the next page is a form fault, not a query fault.** If a heading
+click sorts the page but pagination, the limit box or a search brings back the default order,
+`populateState()` is receiving a rejected `list[fullordering]` and falling back to the default.
+Inspect the list `<form>` in the browser before touching the model. Look for a missing
+`list[fullordering]` input (the script then posts `null ASC`), a `list[fullorder]` misspelling, a
+value wrapped across lines, or a duplicate `fullordering` select from the filter XML. Then check
+that the View's `filter_fields` reaches the model before `getItems()`. See "List Sorting — Column
+Headings Only" in `includes/joomla-coding-preferences.md`.
+
 ### ACL / Permissions
 - Missing `authorise()` checks in controllers
 - Incorrect action names in `access.xml`

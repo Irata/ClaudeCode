@@ -918,7 +918,12 @@ Place this immediately before the title link in the title `<td>`.
   <table class="table" id="{entity}List" data-name="com_{name}.{entities}">
   ```
   Without `data-name` the script keys its saved state off the translated `.page-title` text — and throws outright in a layout that never sets one. A `colspan` empty-state row inside `<tbody>` makes hiding a column raise `Cannot read properties of undefined`. Icon-only headings need a `<span class="visually-hidden">` label or their dropdown entry is blank. Not loaded in `modal.php`. See "Column Visibility Toggle (`table.columns`)" in the coding preferences.
-- **List sorting is the column headings alone.** Each sortable heading is `HTMLHelper::_('searchtools.sort', …)`. The list `<form>` carries only `task`, `boxchecked` and `form.token` as hidden inputs. **Never add a `list[fullorder]` or `list[fullordering]` hidden input:** `searchtools.js` creates the field itself. See "List Sorting — Column Headings Only" in the coding preferences. Reference: the canonical extension for this pattern — see `includes/joomla-canonical-references.md`.
+- **List sorting is the column headings alone, carried between requests by one hidden input.** Each sortable heading is `HTMLHelper::_('searchtools.sort', …)`. Besides `task`, `boxchecked` and `form.token`, the list `<form>` MUST carry exactly one ordering input, written on a single line:
+  ```php
+  <input type="hidden" name="list[fullordering]" id="list_fullordering" value="<?php echo $listOrder; ?> <?php echo $listDirn; ?>"/>
+  ```
+  Without it, `searchtools.js` creates the field valued `null ASC`. Every pagination, limit or search submit then posts that value, and the chosen sort is reset to the default. Do not name it `list[fullorder]`, do not wrap the value across lines, and do not pair it with a `fullordering` select in the filter XML. Each of these loses the sort in the same way. See "List Sorting — Column Headings Only" in the coding preferences. Reference: see `includes/joomla-canonical-references.md`.
+- **Test sorting past page one.** A heading click proves only that the column is in `filter_fields`. Also check that the sort survives a pagination click; that is what exercises the hidden input.
 - **Lock icon on tables with `checked_out`:** render `HTMLHelper::_('jgrid.checkedout', $i, $item->editor, $item->checked_out_time, '{entities}.', $canCheckin)` before the edit link, inside `if ($item->checked_out)`. See `includes/joomla-checkout-checkin-pattern.md`.
 - Edit view: Use `HTMLHelper::_('uitab.startTabSet')` for tabbed interfaces
 - Include CSRF tokens: `HTMLHelper::_('form.token')`

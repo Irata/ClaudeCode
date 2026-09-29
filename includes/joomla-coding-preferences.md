@@ -939,28 +939,51 @@ KEY `idx_lft` (`lft`)
 
 ### List Sorting — Column Headings Only
 
-Sorting belongs to the column headings. Nothing else in the list participates:
+Sorting belongs to the column headings. There is no sort dropdown. The chosen column is carried
+from one request to the next by **one** hidden input, and it has to be exactly right:
 
 | Piece | Rule |
 |---|---|
 | Column headings | `HTMLHelper::_('searchtools.sort', 'COM_{NAME}_COLUMN_{FIELD}', '{column}', $listDirn, $listOrder)` |
-| `$listOrder`, `$listDirn` | Read from `$this->state` at the top of the template, for the headings only |
+| `$listOrder`, `$listDirn` | Read from `$this->state` at the top of the template, escaped. Used by the headings and the hidden input |
 | Filter XML `<fields name="list">` | `limit` alone. No `fullordering` field, not even commented out |
-| Hidden inputs in the list `<form>` | `task`, `boxchecked` and `form.token` only. **No** `list[fullorder]` or `list[fullordering]` input. `media/system/js/searchtools.js` creates `list[fullordering]` itself when the form lacks one |
-| `filter_fields` on the View | Every column a heading offers. `ListModel::populateState()` discards any ordering not listed |
+| Hidden inputs in the list `<form>` | `task`, `boxchecked`, `form.token`, and **exactly one** `list[fullordering]` input, with `id="list_fullordering"` and its value on a single line (below) |
+| `filter_fields` on the View | Every column a heading offers, pushed into the model with `setFilterFields()` before `getItems()`. `ListModel::populateState()` discards any ordering not listed |
 | Language | Only `COM_{NAME}_COLUMN_*` strings for the headings. No `_FIELDSORT_*`, `_LIST_FULL_ORDERING*` or `*_ASCENDING`/`*_DESCENDING` strings, which only a sort dropdown uses |
 
-**Leftovers to remove when found.** These are dead weight from a removed dropdown, and each one
-misleads the next reader:
-- a commented-out `<field name="fullordering">` block
-- a hidden `list[fullorder]` input. Nothing reads that name, so it is inert
+```php
+<input type="hidden" name="list[fullordering]" id="list_fullordering" value="<?php echo $listOrder; ?> <?php echo $listDirn; ?>"/>
+```
+
+**Why the input is required.** The `joomla.searchtools.default` layout points `searchtools.js` at
+`#list_fullordering` but never passes it the active ordering. When the form has no such field,
+the script creates one whose value is the literal `null ASC`. Clicking a heading overwrites that
+value, so the first sort works. But every later submit (a pagination link, the limit box, a
+search) posts `null ASC`. `populateState()` rejects `null`, falls back to the default, and saves
+that default to the user state. The chosen sort is lost.
+
+**Symptom of any fault in this chain:** clicking a heading sorts the current page, but the next
+page, or any other submit, comes back in the default order. Check these in order:
+
+| Cause | What happens |
+|---|---|
+| No `list[fullordering]` input | `searchtools.js` creates one valued `null ASC`, which later submits post |
+| Input named `list[fullorder]` | Nothing reads it, so it behaves the same as having no input |
+| Input value split across lines (`value="<?php echo $listOrder; ?>` ↵ `<?php echo $listDirn; ?>"`) | The newline and indentation become part of the column name, which then fails the `filter_fields` check |
+| A live `fullordering` select in the filter XML **and** the hidden input | Two elements with the same name and id. The script updates the select, but PHP keeps the last posted value, which is the stale hidden one, so a heading click never takes effect |
+| Column missing from `filter_fields`, or `filter_fields` never reached the model (for example `createModel()`/`useModel()` with no config and no `setFilterFields()`) | The column is rejected on every request. If the whitelist is empty, no heading sorts at all |
+
+**Leftovers to clean up when found.** These come from a removed dropdown, and each one misleads
+the next reader:
+- a commented-out `<field name="fullordering">` block. Delete it
+- a hidden `list[fullorder]` input. Rename it to `list[fullordering]` and add
+  `id="list_fullordering"`, as above. Do not simply delete it
 - `_FIELDSORT_*` and `_LIST_FULL_ORDERING*` language constants, and sort options with English
   typed into the XML (`ID Ascending`)
 
 `/language-audit` lists the orphaned constants as unused once the block is gone.
 
-Reference implementation: see `includes/joomla-canonical-references.md`:
-`forms/filter_rules.xml` and `tmpl/rules/default.php`.
+Reference implementation: see `includes/joomla-canonical-references.md`.
 
 ### Rendering the List Filter Bar (searchtools)
 - Render the search/filter toolbar with `LayoutHelper::render('joomla.searchtools.default', ['view' => $this])` — **NOT** `HTMLHelper::_('searchtools.default', ...)`.

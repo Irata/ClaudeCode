@@ -184,6 +184,7 @@ All Joomla extensions must follow the **DRY (Don't Repeat Yourself) principle wi
 | **Filter applied but not in `getStoreId()`** | `ListModel` | A `filter.X` used in `getListQuery()` with no matching `$id .= ':' . $this->getState('filter.X')` line | Add the line — otherwise cached results leak across filter states |
 | **`filter_fields`/`haystack` declared in the model** | `ListModel::__construct()` | `$config['filter_fields'] = [...]`, `$this->haystack = $config['haystack'] ?? null`, or either array hard-coded on the model | Move both arrays onto the list `HtmlView` and push them in with `$model->setFilterFields()` / `$model->setHaystack()` **before** `getItems()`. They describe the template, not the model. See `includes/joomla-coding-preferences.md` → *Preferred `getListQuery()` Pattern* |
 | **Sortable heading missing from `filter_fields`** | list `HtmlView` + `tmpl` | A column passed to `searchtools.sort` in the template with no matching entry (bare **and** alias-qualified) in the View's `filter_fields` | Add both forms — `populateState()` silently drops the ordering and the heading looks sortable while doing nothing |
+| **`filter_fields` never reaches the model** | list `HtmlView` | The model is created with `createModel()`/`useModel()` and no `filter_fields` config, and `setFilterFields()` is never called before `getItems()` | Declare the arrays on the View and call `setFilterFields()`/`setHaystack()` before `getItems()`. With an empty whitelist no heading sorts, and a search iterates a `null` haystack |
 | **Admin list view without the column toggle** | list `tmpl` | An administrator `tmpl/{entities}/default.php` rendering a `<table>` with no `useScript('table.columns')` | Add `$wa->useScript('table.columns')->useScript('multiselect');` and a `data-name` on the table. Core ships the dropdown on every list; a component without it is the odd one out. See *Column Visibility Toggle* below |
 
 #### **CRITICAL — Missing Inheritance (Layers Not Extending)**
@@ -906,7 +907,26 @@ Flag legacy plugin event patterns and verify that modernizations preserve backwa
 - **Hardcoded timezone**: Flag literal timezone strings (e.g. `'Australia/Melbourne'`) in `new \DateTime(...)` / `Factory::getDate(...)`. **Fix**: use the configured timezone `$app->get('offset', 'UTC')` (site) or `$user->getParam('timezone', ...)` (per-user).
 
 ### Filter Form Patterns
-- **`fullordering` field in filter XML**: Flag any `<field name="fullordering"` in `filter_*.xml` files. Column headings provide sorting via `HTMLHelper::_('searchtools.sort', ...)` — the fullordering dropdown is redundant. The `<fields name="list">` section should only contain the `limit` (limitbox) field.
+- **`fullordering` field in filter XML**: Flag any `<field name="fullordering"` in `filter_*.xml` files. Column headings provide sorting via `HTMLHelper::_('searchtools.sort', ...)` — the fullordering dropdown is redundant. The `<fields name="list">` section should only contain the `limit` (limitbox) field. When the template also carries the hidden `list[fullordering]` input, this is not just redundant: it breaks heading sorts (see below).
+
+### List Sort Lost on Pagination (⚠️ IMPORTANT)
+
+**Symptom:** clicking a column heading sorts the page, but the next page, or any other submit,
+comes back in the default order. Sometimes the heading click itself does nothing. The chosen
+column reaches the next request only through a single hidden `list[fullordering]` input, which
+`ListModel::populateState()` accepts only if the column is in `filter_fields`.
+
+Check every list template and its View. Report **one** finding per list view, naming the cause:
+
+| Check | Detection | Why it loses the sort |
+|---|---|---|
+| Input missing | No `list[fullordering]` in the list `<form>` | The searchtools layout never passes the active ordering, so `searchtools.js` creates the field valued `null ASC`. Every later submit posts that value, which is rejected, and the sort resets to the default |
+| Wrong name | `Grep: "list\[fullorder\]"` across `tmpl/` | Nothing reads that name, so it behaves the same as a missing input |
+| Value split across lines | The `value="…"` attribute spans more than one line | The newline and indentation become part of the column name, which fails the `filter_fields` check |
+| Duplicate with a dropdown | A live `<field name="fullordering"` in the filter XML **and** the hidden input | Two elements share the name and id. The script updates the select, but PHP keeps the last posted value (the stale hidden input), so a heading click never takes effect |
+| Whitelist not applied | View creates the model without `filter_fields` and never calls `setFilterFields()` before `getItems()` | Every column is rejected |
+
+**Fix:** a single-line `<input type="hidden" name="list[fullordering]" id="list_fullordering" value="<?php echo $listOrder; ?> <?php echo $listDirn; ?>"/>` inside the form. Also remove any live `fullordering` select, and make sure `filter_fields` covers every heading. **Never recommend removing this input.** It is required, not a leftover.
 
 ### Sort Dropdown Leftovers — Suggest the Cleanup (💡 SUGGESTION)
 
@@ -918,18 +938,15 @@ as **one** cleanup finding per list view, not one per line.
 **Detection:**
 - `Grep: "fullordering"` across `forms/`. This also catches a block inside `<!-- -->`, which
   the live-field check above ignores.
-- `Grep: "list\[fullorder(ing)?\]"` across `tmpl/`. A hidden input in the list form.
-  `list[fullorder]` is read by nothing. `list[fullordering]` duplicates the field
-  `searchtools.js` creates itself.
 - `Grep: "_FIELDSORT_|_LIST_FULL_ORDERING|_(ASCENDING|DESCENDING)(_LABEL)?\b"` across
   `language/`. Constants only a sort dropdown uses. The language audit lists them as unused,
   and they confirm the finding.
 - Sort `<option>`s with English typed in (`ID Ascending`) where core has the key
   (`JGRID_HEADING_ID_ASC`, `JSTATUS_ASC`).
 
-**Fix:** delete the commented block, the hidden input and the orphaned constants together.
-Keep `$listOrder` and `$listDirn` in the template: the headings use them. Do not add a
-`list[fullordering]` input back "for safety".
+**Fix:** delete the commented block and the orphaned constants together. Keep `$listOrder` and
+`$listDirn` in the template, and keep the hidden `list[fullordering]` input. The headings and
+that input both use them.
 
 **Before suggesting it**, confirm every column the headings sort by is in the View's
 `filter_fields`. That list, not the dropdown, is what makes a heading sort work.
