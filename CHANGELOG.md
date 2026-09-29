@@ -14,6 +14,27 @@ History before 2026-09-16 is in the git log.
 
 ## [Unreleased]
 
+### Added
+
+- **`/manifest-menu-sync` skill** — brings a development instance's administrator
+  menu into line with a component manifest without reinstalling. A symlinked
+  component never goes through the installer, and the installer is the only thing
+  that turns `<menu>`/`<submenu>` into `#__menu` rows. As a result, a new submenu
+  never appears, a removed one lingers, and a renamed key leaves the raw constant on
+  screen. This is what hid `com_accountingdata` 1.4.0's Tax Rates page. The script
+  builds the expected rows exactly as `ComponentAdapter::_buildAdminMenus()` does.
+  It matches them to existing rows by link, so ids survive a title change, then adds,
+  removes, updates and reorders. It also re-points stale `component_id`s as
+  `_updateMenus()` does. Every write goes through `Table\Menu`, never raw SQL on the
+  nested set, and it rebuilds the `path` that `store()` leaves as the row's own alias.
+  It checks each title key against the `.sys.ini` the menu actually loads, which is
+  `administrator/language/` first. A leftover global copy therefore shadows a
+  symlinked repo file, and the script warns when that happens. By default it is a dry
+  run; `--apply` writes. `--joomla` is repeatable for several instances.
+
+  **Action required** to use it: run `skills\create_skill_symlinks.bat` in a project
+  to link the new skill.
+
 ### Fixed
 
 - **Placeholder hints no longer end up inside the value.** All three `CLAUDE.md`

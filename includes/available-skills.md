@@ -15,4 +15,5 @@
 | Skill | Description | Example |
 |-------|-------------|---------|
 | `/language-audit` | Audit a Joomla extension's language constants — missing, unused, malformed, duplicated and untranslated — including the messages Joomla builds implicitly from $text_prefix | `/language-audit [path] [--lang=en-GB] [--prefix=COM_EXAMPLE]` |
+| `/manifest-menu-sync` | Bring a development Joomla instance's administrator menu into line with a component manifest's `<menu>`/`<submenu>` — add new entries, remove stale ones, fix renamed keys and order — and confirm every menu language key resolves, without reinstalling the component | `/manifest-menu-sync [path] [--joomla=ROOT] [--lang=en-GB] [--apply]` |
 | `/version-bump` | Bump the V.R.M version across manifest XML, Phing build file, and SQL update file for any Joomla extension project | `/version-bump modification` |
