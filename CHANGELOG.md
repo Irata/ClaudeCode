@@ -14,6 +14,8 @@ History before 2026-09-16 is in the git log.
 
 ## [Unreleased]
 
+## [2026-09-29]
+
 ### Added
 
 - **`/manifest-menu-sync` skill** — brings a development instance's administrator
@@ -74,7 +76,24 @@ History before 2026-09-16 is in the git log.
   `config.bat.example` shows both. Without them the summary is written beside
   `REPOS_DIR` and nothing is left out.
 
+### Changed
+
+- **Line endings are pinned to LF** by `.gitattributes` and `.editorconfig`. The
+  agents, includes and skills are junctioned into every project, so a CRLF
+  checkout on one machine would change what every linked project reads.
+  `core.autocrlf` is a per-machine setting, while `.gitattributes` overrides it
+  and travels with the repository. `.bat`, `.cmd` and `.ps1` stay CRLF for
+  `cmd.exe`. Every tracked file was already LF in the index, so nothing committed
+  changed.
+
 ### Fixed
+
+- **Architecture references no longer name retired memory keys.**
+  `joomla-architect`, `joomla-security-auditor` and the authorisation include
+  still named outputs as `architecture-{ext}-{topic}` and `prd-{ext}-requirements`,
+  left over from the shared memory store that was removed on 2026-09-16. They now
+  name the files the agents actually read and write: `docs/architecture/{ext}-{topic}.md`,
+  `docs/PRD-{ext}.md` and the project's `CLAUDE.md`.
 
 - **A column sort now survives paging.** The previous rule was never to add a
   hidden `list[fullordering]` input, on the grounds that `searchtools.js` creates
@@ -366,7 +385,8 @@ rebuilds the code reviewer around checks drawn from those defects.
 - **`joomla-less-builder` is now under version control.** It was gitignored, so it
   was the one agent a clone of this repository did not receive.
 
-[Unreleased]: https://github.com/Irata/ClaudeCode/compare/9169ca6...HEAD
+[Unreleased]: https://github.com/Irata/ClaudeCode/compare/bda9982...HEAD
+[2026-09-29]: https://github.com/Irata/ClaudeCode/compare/9169ca6...bda9982
 [2026-09-18]: https://github.com/Irata/ClaudeCode/compare/747c251...9169ca6
 [2026-09-17]: https://github.com/Irata/ClaudeCode/compare/bdaa322...747c251
 [2026-09-16]: https://github.com/Irata/ClaudeCode/compare/d2e1750...bdaa322
