@@ -240,4 +240,4 @@ constructor DI; API controllers, plugins, and CLI commands resolve it with the
       satisfied by a header is not an authorisation service.
 - [ ] Service injects no DataModel/DatabaseInterface — it performs no data access.
 - [ ] Action strings and per-item asset names (`com_example.item.{id}`) match `access.xml`
-      and the ACL matrix (`architecture-{ext}-acl-matrix`).
+      and the ACL matrix (`docs/architecture/{ext}-acl-matrix.md`).

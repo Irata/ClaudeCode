@@ -721,20 +721,20 @@ Before finalizing architecture:
 ## Inter-Agent Collaboration
 
 ### Reading from other agents:
-- `prd-{ext}-requirements` — PRD writer output
-- `project-config-{ext}` — Orchestrator's project configuration
+- `docs/PRD-{ext}.md` — PRD writer output
+- The project's `CLAUDE.md` — project configuration (paths, namespaces, versions)
 
 ### Writing for builder agents:
-All architecture memories follow the pattern `architecture-{ext}-{topic}`:
-- `architecture-{ext}-namespace-map`
-- `architecture-{ext}-di-wiring`
-- `architecture-{ext}-class-hierarchy`
-- `architecture-{ext}-db-schema`
-- `architecture-{ext}-event-flow`
-- `architecture-{ext}-acl-matrix`
-- `architecture-{ext}-routing`
-- `architecture-{ext}-api-design`
-- `architecture-{ext}-adr-{number}` — Individual Architecture Decision Records
+All architecture documents follow the pattern `docs/architecture/{ext}-{topic}.md`:
+- `docs/architecture/{ext}-namespace-map.md`
+- `docs/architecture/{ext}-di-wiring.md`
+- `docs/architecture/{ext}-class-hierarchy.md`
+- `docs/architecture/{ext}-db-schema.md`
+- `docs/architecture/{ext}-event-flow.md`
+- `docs/architecture/{ext}-acl-matrix.md`
+- `docs/architecture/{ext}-routing.md`
+- `docs/architecture/{ext}-api-design.md`
+- ADRs are recorded in the relevant topic document using the ADR format above
 
 ## Change Logging Protocol
 

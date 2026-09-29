@@ -88,7 +88,7 @@ Detection patterns:
 - Owner-cascade checks (edit.own/delete.own) re-implemented per context instead of once
   in the AuthorisationService — a common source of edit-own bypass on the API.
 
-Cross-reference against: architecture-{ext}-acl-matrix, architecture-{ext}-authorisation
+Cross-reference against: docs/architecture/{ext}-acl-matrix.md, docs/architecture/{ext}-authorisation.md
 Reference: includes/joomla-authorisation-service-pattern.md
 ```
 
