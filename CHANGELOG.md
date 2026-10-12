@@ -14,6 +14,21 @@ History before 2026-09-16 is in the git log.
 
 ## [Unreleased]
 
+### Fixed
+
+- **`init_joomla_project.bat` no longer overwrites an existing `CLAUDE.md`** — it
+  copied the template over the file with no check, so re-running it on a live
+  project (to pick up new skills, say) discarded a filled-in `CLAUDE.md`. It now
+  asks first, keeps the file by default, and backs it up as
+  `CLAUDE.md.<yyyyMMdd-HHmmss>.bak` before replacing it.
+- **The three link scripts run through a project's links** —
+  `create_agent_symlinks.bat`, `create_include_symlinks.bat` and
+  `create_skill_symlinks.bat` looked for `Link-ClaudeShared.ps1` relative to
+  `%~dp0`. Run through a project's symlink to the file, or a junction over its
+  folder, that is the link's folder, and PowerShell reported that the `.ps1` did not
+  exist. Each script now follows the links in its own path back to the real file
+  when the relative path fails.
+
 ## [2026-09-29]
 
 ### Added
