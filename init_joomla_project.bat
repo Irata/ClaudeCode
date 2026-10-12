@@ -167,6 +167,32 @@ if not exist "%TEMPLATE%" (
     exit /b 1
 )
 
+REM An existing CLAUDE.md is kept unless the user asks for it to be replaced.
+REM Re-running this script on a live project, to pick up new skills say, must
+REM not discard a file that has been filled in. A replaced file is backed up.
+set "CLAUDE_MD=%PROJECT_DIR%\CLAUDE.md"
+if not exist "!CLAUDE_MD!" goto :claude_md_write
+
+echo   CLAUDE.md already exists: !CLAUDE_MD!
+set "OVERWRITE_MD="
+set /p OVERWRITE_MD="  Overwrite it with the template? (Y/N) [N]: "
+if /i not "!OVERWRITE_MD!"=="Y" (
+    echo   Kept the existing CLAUDE.md.
+    goto :claude_md_done
+)
+
+set "MD_STAMP="
+for /f "usebackq delims=" %%T in (`powershell -NoProfile -Command "Get-Date -Format 'yyyyMMdd-HHmmss'"`) do set "MD_STAMP=%%T"
+set "CLAUDE_MD_BACKUP=!CLAUDE_MD!.!MD_STAMP!.bak"
+copy "!CLAUDE_MD!" "!CLAUDE_MD_BACKUP!" >nul
+if not exist "!CLAUDE_MD_BACKUP!" (
+    echo   Error: could not back up the existing CLAUDE.md. Nothing was overwritten.
+    pause
+    exit /b 1
+)
+echo   Backed up to: !CLAUDE_MD_BACKUP!
+
+:claude_md_write
 REM Copy template
 copy "%TEMPLATE%" "%PROJECT_DIR%\CLAUDE.md" >nul
 
@@ -199,6 +225,8 @@ if !errorlevel! neq 0 (
 del "!PS_SCRIPT!" 2>nul
 
 echo   Generated: %PROJECT_DIR%\CLAUDE.md
+
+:claude_md_done
 
 REM --- Step 3: Create .claude documentation stubs ---
 echo.
